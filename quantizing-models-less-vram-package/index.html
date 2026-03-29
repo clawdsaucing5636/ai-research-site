@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quantizing Models to Fit in Less VRAM</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="eyebrow">Offline Learning Package</div>
+        <h1>Quantizing Models to Fit in Less VRAM</h1>
+        <p>How lower-precision weights make bigger models practical on smaller GPUs and laptops.</p>
+      </div>
+
+      <nav class="nav" aria-label="Section navigation">
+        <a href="#overview">Overview</a>
+        <a href="#what-is-quantization">What Quantization Is</a>
+        <a href="#why-vram-drops">Why VRAM Drops</a>
+        <a href="#formats">Formats & Precisions</a>
+        <a href="#tradeoffs">Quality / Speed Tradeoffs</a>
+        <a href="#inference-vs-training">Inference vs Fine-Tuning</a>
+        <a href="#tools">Tools & Runtimes</a>
+        <a href="#workflow">Practical Workflow</a>
+        <a href="#mistakes">Common Mistakes</a>
+        <a href="#quantize-vs-smaller">Quantize vs Smaller Model</a>
+        <a href="#checklist">Decision Checklist</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <header class="hero" id="overview">
+        <div class="hero-copy">
+          <span class="pill">Practical • Detailed • Offline-friendly</span>
+          <h2>Quantization is the main reason large language models can run on modest hardware.</h2>
+          <p>
+            By storing model weights in fewer bits, you dramatically reduce memory usage and often make a model usable on a smaller GPU,
+            consumer laptop, or edge device. The trade is that lower precision can slightly reduce quality, change speed characteristics,
+            and limit what kinds of training you can do.
+          </p>
+        </div>
+        <div class="hero-card">
+          <h3>Executive summary</h3>
+          <ul>
+            <li>Weights consume most of the baseline VRAM footprint.</li>
+            <li>Fewer bits per weight means fewer bytes in memory.</li>
+            <li>4-bit and 5-bit quantization often unlock local inference for models that would not otherwise fit.</li>
+            <li>Quantization is usually safer for inference than for full training.</li>
+            <li>Sometimes the better answer is not quantization, but a smaller model with stronger overall quality.</li>
+          </ul>
+        </div>
+      </header>
+
+      <section class="section" id="what-is-quantization">
+        <h2>What Quantization Is</h2>
+        <div class="grid two">
+          <article class="card">
+            <h3>Core idea</h3>
+            <p>
+              Quantization means representing model values with fewer bits than the original training format. Instead of storing each weight as
+              FP16, BF16, or FP32, the runtime stores weights in INT8, 6-bit, 5-bit, 4-bit, or another compressed representation.
+            </p>
+            <p>
+              The model still performs similar math at inference time, but the stored parameters are compressed and then dequantized or used in
+              specialized kernels during computation.
+            </p>
+          </article>
+          <article class="card accent">
+            <h3>What usually gets quantized</h3>
+            <ul>
+              <li><strong>Weights:</strong> the most common target because they dominate memory footprint.</li>
+              <li><strong>Activations:</strong> sometimes quantized for additional savings, but this is harder and can affect quality more.</li>
+              <li><strong>Optimizer states:</strong> relevant in training, not just inference.</li>
+              <li><strong>KV cache:</strong> sometimes compressed during long-context inference to save additional VRAM.</li>
+            </ul>
+          </article>
+        </div>
+        <div class="callout">
+          <strong>Important:</strong> quantization does not magically make a model smarter. It is a compression and deployment strategy, not a capability upgrade.
+        </div>
+      </section>
+
+      <section class="section" id="why-vram-drops">
+        <h2>Why Quantization Reduces VRAM Usage</h2>
+        <div class="grid three stats">
+          <article class="card stat-card">
+            <h3>FP16 / BF16</h3>
+            <p class="big">16 bits</p>
+            <p>About 2 bytes per weight.</p>
+          </article>
+          <article class="card stat-card">
+            <h3>INT8</h3>
+            <p class="big">8 bits</p>
+            <p>About half the weight memory of FP16.</p>
+          </article>
+          <article class="card stat-card">
+            <h3>4-bit</h3>
+            <p class="big">4 bits</p>
+            <p>Roughly one quarter of FP16 weight storage before metadata overhead.</p>
+          </article>
+        </div>
+        <div class="card wide">
+          <h3>Mental model</h3>
+          <p>
+            If a model has billions of parameters, every saved bit matters. A 7B model stored in FP16 needs roughly 14 GB just for the raw
+            weights. Store those same weights in 8-bit and the weight memory drops to around 7 GB. In 4-bit, the raw weight storage drops to
+            roughly 3.5 GB, plus extra overhead for scales, group metadata, temporary buffers, and runtime implementation details.
+          </p>
+          <p>
+            Real VRAM usage is always higher than raw weights alone because inference also needs activations, attention workspace, the KV cache,
+            framework overhead, and sometimes extra staging buffers. Even so, quantizing weights is often the biggest lever.
+          </p>
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <h3>Why the savings are not perfectly linear</h3>
+            <ul>
+              <li>Quantized formats often store per-group or per-channel scale values.</li>
+              <li>Some layers stay in higher precision for stability.</li>
+              <li>The runtime may dequantize chunks into temporary compute buffers.</li>
+              <li>KV cache growth can dominate memory at long context lengths.</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>What quantization helps most</h3>
+            <ul>
+              <li>Fitting a model on a smaller GPU</li>
+              <li>Increasing room for context length or batch size</li>
+              <li>Running local inference on laptops and desktops</li>
+              <li>Reducing memory bandwidth pressure in some runtimes</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="formats">
+        <h2>Common Formats and Precisions</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Format</th>
+                <th>Typical use</th>
+                <th>VRAM impact</th>
+                <th>Quality risk</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>FP16</td>
+                <td>Standard inference and training</td>
+                <td>Moderate</td>
+                <td>Low</td>
+                <td>Common baseline on GPUs with half-precision support.</td>
+              </tr>
+              <tr>
+                <td>BF16</td>
+                <td>Training and inference on supported hardware</td>
+                <td>Same storage as FP16</td>
+                <td>Low</td>
+                <td>Better exponent range than FP16; often more numerically stable in training.</td>
+              </tr>
+              <tr>
+                <td>INT8</td>
+                <td>Inference, some efficient training flows</td>
+                <td>~50% of FP16 weights</td>
+                <td>Low to moderate</td>
+                <td>Often a conservative first quantization target.</td>
+              </tr>
+              <tr>
+                <td>6-bit</td>
+                <td>Inference in specialized formats</td>
+                <td>Better compression than INT8</td>
+                <td>Moderate</td>
+                <td>Can be a strong middle ground when 4-bit is too aggressive.</td>
+              </tr>
+              <tr>
+                <td>5-bit</td>
+                <td>Inference in GGUF / similar ecosystems</td>
+                <td>Very memory efficient</td>
+                <td>Moderate</td>
+                <td>Often chosen for a quality-memory balance on consumer GPUs.</td>
+              </tr>
+              <tr>
+                <td>4-bit</td>
+                <td>Inference and QLoRA-style fine-tuning</td>
+                <td>Very low</td>
+                <td>Moderate to high</td>
+                <td>Extremely useful, but implementation quality matters a lot.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="grid three">
+          <article class="card">
+            <h3>FP16</h3>
+            <p>Half precision floating point. Good default for inference when memory is available. A common reference point when comparing quantized variants.</p>
+          </article>
+          <article class="card">
+            <h3>BF16</h3>
+            <p>Bfloat16 uses 16 bits too, so it does not save VRAM versus FP16, but it often behaves better during training due to wider dynamic range.</p>
+          </article>
+          <article class="card">
+            <h3>INT8</h3>
+            <p>Popular because it cuts memory in half while often preserving most model quality for inference tasks.</p>
+          </article>
+        </div>
+        <div class="grid three">
+          <article class="card">
+            <h3>6-bit</h3>
+            <p>Less universal than 8-bit or 4-bit, but attractive when you want extra compression without going all the way down to the most aggressive low-bit modes.</p>
+          </article>
+          <article class="card">
+            <h3>5-bit</h3>
+            <p>Frequently seen in local-LLM communities because it can preserve noticeably more quality than some 4-bit variants while still fitting in tight VRAM budgets.</p>
+          </article>
+          <article class="card">
+            <h3>4-bit</h3>
+            <p>The workhorse for “this model finally fits.” Very common in GGUF deployments and in QLoRA workflows where the base model is stored quantized.</p>
+          </article>
+        </div>
+        <div class="callout">
+          <strong>Practical note:</strong> two different 4-bit files can behave differently. The exact quantization method, calibration, grouping strategy, and runtime kernel quality all matter.
+        </div>
+      </section>
+
+      <section class="section" id="tradeoffs">
+        <h2>Quality and Speed Tradeoffs</h2>
+        <div class="grid two">
+          <article class="card">
+            <h3>Quality tradeoffs</h3>
+            <ul>
+              <li>Lower-bit formats can slightly reduce factual recall, reasoning reliability, or output consistency.</li>
+              <li>Sensitive layers may lose precision in ways that show up on math, coding, or multilingual tasks.</li>
+              <li>Smaller models suffer more from aggressive quantization than very overprovisioned models in some workloads.</li>
+              <li>The lower the bit width, the more important the quantization algorithm becomes.</li>
+            </ul>
+          </article>
+          <article class="card accent">
+            <h3>Speed tradeoffs</h3>
+            <ul>
+              <li>Quantization can improve speed when memory bandwidth is the bottleneck.</li>
+              <li>It can also slow things down if kernels are poorly optimized or if repeated dequantization is expensive.</li>
+              <li>CPU, CUDA, Metal, and ROCm all have different sweet spots.</li>
+              <li>A quantized model that fits entirely in VRAM may beat a higher-precision model that spills or cannot run at all.</li>
+            </ul>
+          </article>
+        </div>
+        <div class="card wide">
+          <h3>Reality check on performance</h3>
+          <p>
+            People sometimes assume lower bits always mean faster generation. That is not guaranteed. If your runtime has excellent kernels for a
+            given quantization format, speed may improve. If not, a higher-precision format can actually be faster. Always benchmark tokens per
+            second, prompt processing speed, and memory usage on your actual machine.
+          </p>
+        </div>
+      </section>
+
+      <section class="section" id="inference-vs-training">
+        <h2>How Quantization Affects Inference vs Fine-Tuning</h2>
+        <div class="grid two">
+          <article class="card">
+            <h3>Inference</h3>
+            <p>
+              Quantization is most mature and most commonly used for inference. You take a trained model, convert or download a quantized version,
+              and run it with a runtime that supports the chosen format. This is the standard local deployment pattern.
+            </p>
+            <ul>
+              <li>Usually the easiest win</li>
+              <li>Big memory reduction</li>
+              <li>Often acceptable quality loss</li>
+              <li>Ideal for local serving and experimentation</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Fine-tuning</h3>
+            <p>
+              Full training directly in very low precision is harder. Training is more sensitive than inference because gradients, optimizer states,
+              and activations all matter. That is why many workflows use parameter-efficient tuning instead of full low-bit training.
+            </p>
+            <ul>
+              <li>QLoRA keeps the base model quantized, then trains LoRA adapters</li>
+              <li>This dramatically reduces VRAM needs for adaptation</li>
+              <li>You still need enough memory for activations and optimizer-related state</li>
+              <li>Not every training recipe or model architecture behaves equally well</li>
+            </ul>
+          </article>
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <h3>Why QLoRA matters</h3>
+            <p>
+              QLoRA is one of the most important practical developments for small-budget fine-tuning. The base model is stored in 4-bit form,
+              while trainable adapters are learned on top. This makes it feasible to adapt models that would otherwise require much larger GPUs.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Limits of low-bit training</h3>
+            <p>
+              If your goal is maximum training quality on a demanding task, a heavily quantized base may impose a ceiling. Quantized fine-tuning is
+              excellent for many practical adaptations, but it is not always equivalent to full higher-precision training.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="tools">
+        <h2>Common Tools and Runtimes</h2>
+        <div class="grid three">
+          <article class="card">
+            <h3>llama.cpp / GGUF</h3>
+            <p>Widely used for local inference on CPU, CUDA, and Apple Silicon. Popular for 4-bit, 5-bit, and 6-bit model files intended for offline use.</p>
+          </article>
+          <article class="card">
+            <h3>Ollama</h3>
+            <p>User-friendly local serving layer built on common open model runtimes. Good for trying quantized models quickly with minimal setup.</p>
+          </article>
+          <article class="card">
+            <h3>Transformers + bitsandbytes</h3>
+            <p>Common Python path for 8-bit and 4-bit loading in research and application code. Frequently used in QLoRA-style workflows.</p>
+          </article>
+        </div>
+        <div class="grid three">
+          <article class="card">
+            <h3>ExLlama / ExLlamaV2</h3>
+            <p>Optimized inference engines for certain quantized LLM formats on NVIDIA GPUs, often chosen for high-throughput local generation.</p>
+          </article>
+          <article class="card">
+            <h3>vLLM and TensorRT-LLM</h3>
+            <p>Important serving stacks for production inference. Quantization support varies by version and hardware target, so verify exact compatibility.</p>
+          </article>
+          <article class="card">
+            <h3>AutoGPTQ / AWQ / GPTQ-style tools</h3>
+            <p>Families of post-training quantization approaches used to produce efficient deployment artifacts with different quality and speed properties.</p>
+          </article>
+        </div>
+        <div class="callout">
+          <strong>Tool selection rule:</strong> choose the runtime first based on your hardware and deployment target, then choose the model format that runtime handles best.
+        </div>
+      </section>
+
+      <section class="section" id="workflow">
+        <h2>A Practical Quantization Workflow</h2>
+        <div class="recipe">
+          <div class="step"><span>1</span><p>Start with the model in its original recommended inference format, usually FP16 or BF16, and measure quality plus VRAM usage.</p></div>
+          <div class="step"><span>2</span><p>Define the real constraint: GPU VRAM, laptop RAM, target tokens per second, context length, or serving cost.</p></div>
+          <div class="step"><span>3</span><p>Try a conservative option first, such as INT8 or a higher-quality 5-bit quant, before jumping to the smallest possible file.</p></div>
+          <div class="step"><span>4</span><p>Benchmark memory footprint, prompt ingestion speed, decode speed, and task quality on a representative prompt set.</p></div>
+          <div class="step"><span>5</span><p>If the model still does not fit, move to 4-bit or reduce context length, batch size, or KV cache demands.</p></div>
+          <div class="step"><span>6</span><p>If quality drops too much, compare against a smaller native model in FP16 or BF16 instead of forcing a worse low-bit version.</p></div>
+          <div class="step"><span>7</span><p>For fine-tuning, test QLoRA or another parameter-efficient method instead of attempting full training of the entire model.</p></div>
+          <div class="step"><span>8</span><p>Freeze the winning combination of model, quantization, runtime, and prompt setup, then document it for reproducibility.</p></div>
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <h3>Good benchmark set</h3>
+            <ul>
+              <li>Real prompts from your task</li>
+              <li>Edge cases and long inputs</li>
+              <li>A few deterministic comparison prompts</li>
+              <li>Latency and memory measurements recorded side by side</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>What to record</h3>
+            <ul>
+              <li>Model name and exact quantized file</li>
+              <li>Runtime and version</li>
+              <li>GPU / CPU / RAM / VRAM hardware</li>
+              <li>Context length, batch size, and generation settings</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="mistakes">
+        <h2>Common Mistakes</h2>
+        <div class="card wide">
+          <ul class="mistakes">
+            <li>Assuming parameter count alone tells you whether a model will fit; context and KV cache matter too.</li>
+            <li>Comparing different runtimes and blaming the quantization format instead of the kernel implementation.</li>
+            <li>Using the most aggressive 4-bit variant immediately without checking whether 5-bit or 6-bit gives a better quality-memory balance.</li>
+            <li>Ignoring activations, temporary buffers, or max context length when estimating memory needs.</li>
+            <li>Trying full fine-tuning when QLoRA or LoRA would solve the problem more cheaply.</li>
+            <li>Assuming BF16 is a memory optimization; it is not smaller than FP16.</li>
+            <li>Downloading random community quants without verifying provenance, compatibility, or evaluation results.</li>
+            <li>Forcing a heavily quantized large model when a smaller stronger model would be faster, cheaper, and more accurate.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section" id="quantize-vs-smaller">
+        <h2>When to Quantize vs Choose a Smaller Model</h2>
+        <div class="grid two">
+          <article class="card accent">
+            <h3>Quantize when</h3>
+            <ul>
+              <li>The larger model is clearly better on your task and just barely misses your hardware limits.</li>
+              <li>You need to keep a specific checkpoint, architecture, or tokenizer for compatibility reasons.</li>
+              <li>Your runtime has proven optimized support for the target format.</li>
+              <li>A 4-bit or 5-bit version still outperforms smaller alternatives on your evaluation set.</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Choose a smaller model when</h3>
+            <ul>
+              <li>The quantized larger model becomes unstable, slow, or noticeably worse.</li>
+              <li>You want simpler deployment with fewer runtime quirks.</li>
+              <li>Your application values latency and reliability more than peak benchmark scores.</li>
+              <li>The smaller model in higher precision already meets quality requirements.</li>
+            </ul>
+          </article>
+        </div>
+        <div class="callout">
+          <strong>Best operational rule:</strong> compare end-to-end task success, not model prestige. A smaller model that runs cleanly at good speed often beats an awkward oversized model squeezed into 4-bit.
+        </div>
+      </section>
+
+      <section class="section" id="checklist">
+        <h2>Final Decision Checklist</h2>
+        <div class="grid two">
+          <article class="card">
+            <h3>Before quantizing</h3>
+            <ul>
+              <li>Measure baseline VRAM and quality</li>
+              <li>Know your target context length</li>
+              <li>Choose a runtime compatible with your hardware</li>
+              <li>Define acceptable quality loss ahead of time</li>
+              <li>Prepare a representative prompt benchmark set</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Before shipping</h3>
+            <ul>
+              <li>Benchmark multiple quantization levels, not just one</li>
+              <li>Confirm memory fits with margin, not just barely</li>
+              <li>Test long prompts and sustained generation</li>
+              <li>Document exact file, runtime, and settings</li>
+              <li>Compare against at least one smaller native model</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <p>Offline package created for practical model deployment decisions. Built to remain readable without internet access.</p>
+      </footer>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
