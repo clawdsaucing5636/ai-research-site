@@ -1,0 +1,23 @@
+<!doctype html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>Serving and Deployment Basics</title>
+      <link rel="stylesheet" href="../assets/styles.css" />
+    </head>
+    <body>
+
+<div class="page layout">
+  <aside class="sidebar">
+    <div class="sidebar-card"><div class="eyebrow">Lesson 13</div><h2>Serving and Deployment Basics</h2><p>Operating LLMs in production.</p><nav><a href="../index.html">Library home</a><a href="../safety-and-hallucinations/index.html">Previous</a><a href="../roadmap/index.html">Next</a></nav></div>
+    <div class="sidebar-card"><h3>Questions to keep in mind</h3><ul><li>What is a serving stack?</li><li>Why do latency and throughput trade off?</li><li>How do hardware choices shape deployment?</li></ul></div>
+  </aside>
+  <main class="content">
+    <section class="hero"><div><span class="eyebrow">Production systems</span><h1>Serving and Deployment Basics</h1><p class="lead">Deployment turns a model into a service. That means APIs, scheduling, memory management, observability, batching, caching, and cost control.</p></div><div class="hero-panel"><h3>Deployment truth</h3><p>The best production model is the one that meets quality goals reliably at acceptable cost and latency.</p></div></section><section class="section"><h2>Core service metrics</h2><div class="grid three"><div class="card"><h3>Latency</h3><p>How long a request takes.</p></div><div class="card"><h3>Throughput</h3><p>How much work the system can process over time.</p></div><div class="card"><h3>Concurrency</h3><p>How many requests can be active at once.</p></div></div></section><section class="section"><h2>Design levers</h2><ul><li>Model size and routing strategy</li><li>Batching and caching</li><li>Quantization for memory efficiency</li><li>Prompt budgeting and context management</li></ul><p>This page intentionally avoids duplicating the existing site’s deeper infrastructure pages. For those, continue to <a href="../../ai-research-site/ai-hardware-research-package/index.html">AI Hardware Fundamentals</a>, <a href="../../ai-research-site/mac-vs-traditional-ai-paper/index.html">Mac vs Traditional Hardware</a>, and <a href="../../ai-research-site/quantizing-models-less-vram-package/index.html">Quantization and VRAM</a>.</p></section>
+    <div class="footer"><a href="../roadmap/index.html">Continue → Roadmap and Learning Path</a></div>
+  </main>
+</div>
+
+    </body>
+    </html>

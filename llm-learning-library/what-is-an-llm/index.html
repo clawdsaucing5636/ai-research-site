@@ -1,0 +1,28 @@
+<!doctype html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>What an LLM Is</title>
+      <link rel="stylesheet" href="../assets/styles.css" />
+    </head>
+    <body>
+
+<div class="page layout">
+  <aside class="sidebar">
+    <div class="sidebar-card"><div class="eyebrow">Lesson 1</div><h2>What an LLM Is</h2><p>Start here if you are new.</p><nav><a href="../index.html">Library home</a><a href="../tokens-and-tokenization/index.html">Next: Tokens</a></nav></div>
+    <div class="sidebar-card"><h3>Questions to keep in mind</h3><ul><li>What is the model actually doing?</li><li>Why do LLMs feel intelligent?</li><li>What can they not reliably do?</li></ul></div>
+  </aside>
+  <main class="content">
+
+<section class="hero"><div><span class="eyebrow">Foundations</span><h1>What an LLM Is</h1><p class="lead">A large language model is not a database, a person, or a magic reasoning engine. At its core, it is a neural network trained to predict the next token in a sequence. That simple objective, scaled up far enough, produces surprisingly broad language behavior.</p><div class="pill-row"><span class="pill">Predicts next token</span><span class="pill">Learns statistical structure</span><span class="pill">Wrapped in software systems</span></div></div><div class="hero-panel"><h3>Core claim</h3><p>If you understand next-token prediction, context, and learned representations, the rest of the LLM stack becomes much easier to reason about.</p></div></section>
+<section class="section"><h2>The shortest useful definition</h2><p>An LLM is a very large neural network that has been trained on vast text-like data so it can continue a sequence one token at a time. During training it compresses patterns of language, facts, style, structure, and correlations into its weights. During use, it reads your prompt, computes probabilities for what should come next, samples or chooses the next token, appends it, and repeats.</p><div class="callout"><strong>Why "language model"?</strong> Because it models the probability distribution of token sequences. "Large" mainly refers to parameter count, training data scale, and compute budget.</div></section>
+<section class="section"><h2>Why this simple objective becomes powerful</h2><div class="grid three"><div class="card"><h3>Compression of patterns</h3><p>To predict well, the model must absorb grammar, syntax, facts, topic structure, code conventions, and latent relationships between concepts.</p></div><div class="card"><h3>Scale changes behavior</h3><p>Small models memorize shallow patterns. Large models, trained broadly, begin showing abstraction, transfer, and more coherent multi-step outputs.</p></div><div class="card"><h3>Instruction tuning matters</h3><p>The raw model predicts text. Chat behavior usually comes later, through instruction tuning, preference optimization, safety tuning, and system-level scaffolding.</p></div></div></section>
+<section class="section"><h2>Main limits to remember</h2><div class="table-wrap"><table><thead><tr><th>Limit</th><th>Why it happens</th><th>Practical consequence</th></tr></thead><tbody><tr><td>Hallucination</td><td>The model generates plausible text even when evidence is missing.</td><td>You need retrieval, verification, or evaluation loops for factual tasks.</td></tr><tr><td>Context dependence</td><td>The model only sees the prompt window, not the whole world.</td><td>Prompt quality and context management strongly affect performance.</td></tr><tr><td>No durable memory by default</td><td>Each call is usually stateless unless the application stores history.</td><td>Applications must explicitly manage memory, documents, and user state.</td></tr><tr><td>Training cutoffs and bias</td><td>Knowledge reflects its training distribution and later tuning choices.</td><td>Fresh data and domain grounding often require RAG or fine-tuning.</td></tr></tbody></table></div><div class="callout">Next step: learn how text is broken into <strong>tokens</strong>. Tokens are the unit the model actually sees and predicts, so they shape cost, context length, and model behavior.</div></section>
+
+    <div class="footer"><a href="../tokens-and-tokenization/index.html">Continue to Lesson 2 → Tokens and Tokenization</a></div>
+  </main>
+</div>
+
+    </body>
+    </html>

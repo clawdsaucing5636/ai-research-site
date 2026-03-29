@@ -1,0 +1,23 @@
+<!doctype html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>Inference Pipeline</title>
+      <link rel="stylesheet" href="../assets/styles.css" />
+    </head>
+    <body>
+
+<div class="page layout">
+  <aside class="sidebar">
+    <div class="sidebar-card"><div class="eyebrow">Lesson 6</div><h2>Inference Pipeline</h2><p>From prompt to generated text.</p><nav><a href="../index.html">Library home</a><a href="../context-windows-and-kv-cache/index.html">Previous</a><a href="../prompting-and-system-prompts/index.html">Next</a></nav></div>
+    <div class="sidebar-card"><h3>Questions to keep in mind</h3><ul><li>What happens after a prompt is sent?</li><li>What is prefill versus decode?</li><li>Where do sampling choices enter?</li></ul></div>
+  </aside>
+  <main class="content">
+    <section class="hero"><div><span class="eyebrow">Runtime</span><h1>The Inference Pipeline</h1><p class="lead">Inference is the end-to-end runtime path from assembled prompt to emitted output. Understanding it helps explain latency, streaming behavior, and control knobs.</p></div><div class="hero-panel"><h3>Pipeline lens</h3><p>Many quality and performance issues are pipeline problems, not purely model problems.</p></div></section><section class="section"><h2>Step-by-step</h2><div class="roadmap"><div class="roadmap-step"><div class="stepnum">1</div><div><h3>Prompt assembly</h3><p>Gather instructions, history, retrieved docs, and tool results.</p></div></div><div class="roadmap-step"><div class="stepnum">2</div><div><h3>Tokenization</h3><p>Convert text to token IDs.</p></div></div><div class="roadmap-step"><div class="stepnum">3</div><div><h3>Prefill</h3><p>Process the full prompt and build cache state.</p></div></div><div class="roadmap-step"><div class="stepnum">4</div><div><h3>Decode</h3><p>Generate one token at a time.</p></div></div><div class="roadmap-step"><div class="stepnum">5</div><div><h3>Detokenize and validate</h3><p>Convert tokens back to text or structured outputs.</p></div></div></div></section><section class="section"><h2>Sampling knobs</h2><div class="table-wrap"><table><thead><tr><th>Knob</th><th>What it changes</th></tr></thead><tbody><tr><td>Temperature</td><td>How random or conservative token selection is.</td></tr><tr><td>Top-k / Top-p</td><td>Which candidate tokens are eligible.</td></tr><tr><td>Max tokens</td><td>How long the response may grow.</td></tr></tbody></table></div><div class="callout">Next: prompting is how applications steer this pipeline without changing the model’s weights.</div></section>
+    <div class="footer"><a href="../prompting-and-system-prompts/index.html">Continue → Prompting and System Prompts</a></div>
+  </main>
+</div>
+
+    </body>
+    </html>

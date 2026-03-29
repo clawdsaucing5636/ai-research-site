@@ -1,0 +1,23 @@
+<!doctype html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>Agents and Tool Use</title>
+      <link rel="stylesheet" href="../assets/styles.css" />
+    </head>
+    <body>
+
+<div class="page layout">
+  <aside class="sidebar">
+    <div class="sidebar-card"><div class="eyebrow">Lesson 9</div><h2>Agents and Tool Use</h2><p>From language to action.</p><nav><a href="../index.html">Library home</a><a href="../rag/index.html">Previous</a><a href="../training-spectrum/index.html">Next</a></nav></div>
+    <div class="sidebar-card"><h3>Questions to keep in mind</h3><ul><li>When should a model call a tool?</li><li>What makes something agentic?</li><li>Why are guardrails essential?</li></ul></div>
+  </aside>
+  <main class="content">
+    <section class="hero"><div><span class="eyebrow">Action layer</span><h1>Agents and Tool Use</h1><p class="lead">A text-only model cannot look things up or take action on its own. Tool use and agent loops let an application connect the model to APIs, databases, code execution, or other software.</p></div><div class="hero-panel"><h3>Minimal definition</h3><p>An agent is an LLM-driven loop that can observe, decide, act, and continue until a goal or stop condition is reached.</p></div></section><section class="section"><h2>Tool use vs agents</h2><div class="grid two"><div class="card"><h3>Tool use</h3><p>The model selects a function and passes arguments.</p></div><div class="card"><h3>Agentic loop</h3><p>The model repeatedly plans, acts, observes results, and updates its next step.</p></div></div></section><section class="section"><h2>Main risks</h2><div class="table-wrap"><table><thead><tr><th>Failure</th><th>Mitigation</th></tr></thead><tbody><tr><td>Wrong tool choice</td><td>Better routing, tool descriptions, and evals.</td></tr><tr><td>Looping without progress</td><td>Step limits, watchdogs, and progress checks.</td></tr><tr><td>Unsafe action</td><td>Permissions, approvals, validation, scoped credentials.</td></tr></tbody></table></div><div class="callout">Agents are software systems, not just clever prompts. Measure task success and safety together.</div></section>
+    <div class="footer"><a href="../training-spectrum/index.html">Continue → Training Spectrum</a></div>
+  </main>
+</div>
+
+    </body>
+    </html>

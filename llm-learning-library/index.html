@@ -1,0 +1,84 @@
+<!doctype html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>LLM Learning Library</title>
+      <link rel="stylesheet" href="assets/styles.css" />
+    </head>
+    <body>
+
+<div class="page">
+  <div class="topbar">
+    <div class="brandline"><span class="branddot"></span><span>AI Research Site / New Section</span></div>
+    <div class="topnav">
+      <a href="../ai-research-site/index.html">Back to research site</a>
+      <a href="roadmap/index.html">Start the roadmap</a>
+    </div>
+  </div>
+  <header class="hero">
+    <div>
+      <span class="eyebrow">Beginner-to-full-stack curriculum</span>
+      <h1>LLM Learning Library</h1>
+      <p class="lead">A coherent path for learning large language models from first principles through production systems. This section is designed for a serious beginner: simple enough to enter, but deep enough to build real understanding.</p>
+      <div class="pill-row">
+        <span class="pill">Foundations before hype</span>
+        <span class="pill">Cross-links instead of duplication</span>
+        <span class="pill">Offline and self-contained</span>
+      </div>
+      <div class="hero-actions">
+        <a class="button primary" href="what-is-an-llm/index.html">Lesson 1: What is an LLM?</a>
+        <a class="button" href="#curriculum">See curriculum</a>
+      </div>
+    </div>
+    <aside class="hero-panel">
+      <h3>How to use this library</h3>
+      <ul>
+        <li>Read in order if you are starting from scratch.</li>
+        <li>Use the roadmap page to decide what to learn next.</li>
+        <li>Jump out to existing site sections for hardware, quantization, and fine-tuning details.</li>
+        <li>Think in layers: model internals, inference, application patterns, evaluation, and deployment.</li>
+      </ul>
+      <div class="callout">This library avoids re-explaining topics already covered elsewhere on the site. When overlap matters, it points you to the existing deeper page.</div>
+    </aside>
+  </header>
+  <section class="section" id="curriculum">
+    <div class="kicker">Curriculum</div>
+    <h2>The learning sequence</h2>
+    <p>Each page has a clear scope. The order below is designed to build intuition before detail, then detail before systems, then systems before optimization.</p>
+    <div class="curriculum">
+      <a class="card link-card" href="what-is-an-llm/index.html"><div class="mini">1 · Foundations</div><h3>What an LLM Is</h3><p>Parameters, next-token prediction, capabilities, and limits.</p></a>
+      <a class="card link-card" href="tokens-and-tokenization/index.html"><div class="mini">2 · Representation</div><h3>Tokens and Tokenization</h3><p>How text becomes model input and why token boundaries matter.</p></a>
+      <a class="card link-card" href="embeddings-and-vector-search/index.html"><div class="mini">3 · Semantics</div><h3>Embeddings and Vector Search</h3><p>Dense meaning representations, similarity, indexes, and retrieval basics.</p></a>
+      <a class="card link-card" href="transformers-and-attention/index.html"><div class="mini">4 · Architecture</div><h3>Transformers and Attention</h3><p>The core model design that made modern LLMs practical.</p></a>
+      <a class="card link-card" href="context-windows-and-kv-cache/index.html"><div class="mini">5 · Memory during inference</div><h3>Context Windows and KV Cache</h3><p>Why long prompts cost more and how decoding reuses computation.</p></a>
+      <a class="card link-card" href="inference-pipeline/index.html"><div class="mini">6 · Runtime</div><h3>Inference Pipeline</h3><p>From prompt assembly to logits, sampling, and streamed output.</p></a>
+      <a class="card link-card" href="prompting-and-system-prompts/index.html"><div class="mini">7 · Control</div><h3>Prompting and System Prompts</h3><p>How instructions shape behavior without changing weights.</p></a>
+      <a class="card link-card" href="rag/index.html"><div class="mini">8 · Knowledge integration</div><h3>RAG</h3><p>Injecting external documents into generation workflows.</p></a>
+      <a class="card link-card" href="agents-and-tool-use/index.html"><div class="mini">9 · Action</div><h3>Agents and Tool Use</h3><p>Loops, planning, function calling, and reliability boundaries.</p></a>
+      <a class="card link-card" href="training-spectrum/index.html"><div class="mini">10 · Training landscape</div><h3>Pretraining vs Training vs Fine-Tuning</h3><p>Where knowledge, behavior, and adaptation actually come from.</p></a>
+      <a class="card link-card" href="evaluation-and-benchmarks/index.html"><div class="mini">11 · Measurement</div><h3>Evaluation and Benchmarks</h3><p>How to tell if a model is actually better for your use case.</p></a>
+      <a class="card link-card" href="safety-and-hallucinations/index.html"><div class="mini">12 · Risk</div><h3>Safety and Hallucinations</h3><p>Failure modes, guardrails, and what responsible deployment means.</p></a>
+      <a class="card link-card" href="serving-and-deployment-basics/index.html"><div class="mini">13 · Production</div><h3>Serving and Deployment Basics</h3><p>Latency, throughput, GPUs, APIs, and operating an LLM system.</p></a>
+      <a class="card link-card" href="roadmap/index.html"><div class="mini">14 · Integration</div><h3>Roadmap and Learning Path</h3><p>How to turn theory into projects and practical competence.</p></a>
+    </div>
+  </section>
+  <section class="section">
+    <div class="kicker">Related existing sections</div>
+    <h2>Already covered elsewhere on the site</h2>
+    <div class="grid three">
+      <a class="card link-card" href="../ai-research-site/ai-hardware-research-package/index.html"><h3>AI Hardware Fundamentals</h3><p>Use this after the inference and serving pages if you want a deeper treatment of GPUs, memory, and system bottlenecks.</p></a>
+      <a class="card link-card" href="../ai-research-site/fine-tuning-specific-task-package/index.html"><h3>Fine-Tuning for a Specific Task</h3><p>The training-spectrum page links here for the deeper operational guide to LoRA, QLoRA, datasets, and workflow.</p></a>
+      <a class="card link-card" href="../ai-research-site/quantizing-models-less-vram-package/index.html"><h3>Quantization and VRAM</h3><p>The serving and context pages reference this when you want the dedicated explanation of model compression tradeoffs.</p></a>
+    </div>
+  </section>
+  <section class="section">
+    <div class="kicker">Mental model</div>
+    <h2>The full stack in one sentence</h2>
+    <p class="quote">An LLM is a trained next-token predictor wrapped in a software system that turns text into tokens, processes them with transformer layers, generates outputs through sampling, and becomes useful only when paired with prompts, retrieval, tools, evaluation, and deployment discipline.</p>
+  </section>
+  <div class="footer">Homepage title for this section: <strong>LLM Learning Library</strong>.</div>
+</div>
+
+    </body>
+    </html>

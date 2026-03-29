@@ -1,0 +1,23 @@
+<!doctype html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>Tokens and Tokenization</title>
+      <link rel="stylesheet" href="../assets/styles.css" />
+    </head>
+    <body>
+
+<div class="page layout">
+  <aside class="sidebar">
+    <div class="sidebar-card"><div class="eyebrow">Lesson 2</div><h2>Tokens and Tokenization</h2><p>How text becomes model input.</p><nav><a href="../index.html">Library home</a><a href="../what-is-an-llm/index.html">Previous</a><a href="../embeddings-and-vector-search/index.html">Next</a></nav></div>
+    <div class="sidebar-card"><h3>Questions to keep in mind</h3><ul><li>Why tokens instead of words?</li><li>Why do costs vary by phrasing?</li><li>Why can formatting matter?</li></ul></div>
+  </aside>
+  <main class="content">
+    <section class="hero"><div><span class="eyebrow">Representation</span><h1>Tokens and Tokenization</h1><p class="lead">Models do not read words directly. They read tokens: subword pieces mapped to integer IDs. Tokenization helps explain pricing, context limits, truncation, and many prompt quirks.</p></div><div class="hero-panel"><h3>Key idea</h3><p>Tokenization is the compression layer between human text and model computation.</p></div></section><section class="section"><h2>What a token is</h2><p>A token can be a word fragment, full word, punctuation mark, whitespace pattern, or code chunk. That is why a short-looking input may still consume many tokens.</p><div class="grid three"><div class="card"><h3>Not whole words</h3><p>Whole-word vocabularies scale badly and handle rare words poorly.</p></div><div class="card"><h3>Not single characters</h3><p>Character sequences are too long and inefficient for large-scale modeling.</p></div><div class="card"><h3>Subwords are the compromise</h3><p>Common fragments become reusable pieces across many words.</p></div></div></section><section class="section"><h2>What tokenization affects</h2><div class="table-wrap"><table><thead><tr><th>Area</th><th>Impact</th></tr></thead><tbody><tr><td>Cost</td><td>APIs usually bill by input and output tokens.</td></tr><tr><td>Latency</td><td>Longer sequences mean more computation.</td></tr><tr><td>Context</td><td>Limits are measured in tokens, not words or pages.</td></tr><tr><td>RAG chunking</td><td>Splitting documents by characters alone is often wrong.</td></tr></tbody></table></div><div class="callout">Next: embeddings turn token IDs into dense vectors that carry semantic structure.</div></section>
+    <div class="footer"><a href="../embeddings-and-vector-search/index.html">Continue → Embeddings and Vector Search</a></div>
+  </main>
+</div>
+
+    </body>
+    </html>
