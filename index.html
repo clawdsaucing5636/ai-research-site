@@ -1,0 +1,53 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Research Site</title>
+  <style>
+    :root{--bg:#0b1020;--panel:#121936;--panel2:#182246;--text:#e8ecff;--muted:#aab5e6;--accent:#78a6ff;--accent2:#8ef0c9;--border:#2a356b}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(180deg,#0b1020,#0f1630);color:var(--text)}
+    .wrap{max-width:1100px;margin:0 auto;padding:32px 20px 60px}
+    .hero{background:linear-gradient(135deg,var(--panel),var(--panel2));border:1px solid var(--border);border-radius:20px;padding:28px 24px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+    h1,h2,h3{margin:0 0 12px} p{color:var(--muted);line-height:1.65}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:22px}
+    .card{display:block;text-decoration:none;color:inherit;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:18px;padding:18px;transition:.18s ease}
+    .card:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 12px 30px rgba(0,0,0,.22)}
+    .tag{display:inline-block;font-size:12px;padding:5px 9px;border-radius:999px;background:rgba(120,166,255,.14);color:#bcd0ff;margin-bottom:10px}
+    .footer{margin-top:30px;font-size:13px;color:var(--muted)}
+    a.inline{color:var(--accent2)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <span class="tag">Persistent research library</span>
+      <h1>AI Research Site</h1>
+      <p>A growing, single-link library for research deliverables. New topics will be added here so everything stays under one URL.</p>
+    </section>
+
+    <section style="margin-top:24px">
+      <h2>Current topics</h2>
+      <div class="grid">
+        <a class="card" href="../ai-hardware-research-package/index.html">
+          <span class="tag">Hardware</span>
+          <h3>AI Hardware Fundamentals</h3>
+          <p>CPU, RAM, GPU, storage, PCIe, bottlenecks, and build tiers for self-hosting and fine-tuning.</p>
+        </a>
+        <a class="card" href="../mac-vs-traditional-ai-paper/index.html">
+          <span class="tag">Platform comparison</span>
+          <h3>Mac vs Traditional AI Hardware</h3>
+          <p>Apple Silicon vs PC/server hardware for local AI, fine-tuning, power, ecosystem, and fit by use case.</p>
+        </a>
+        <a class="card" href="../fine-tuning-specific-task-package/index.html">
+          <span class="tag">Model training</span>
+          <h3>Fine-Tuning a Model to a Specific Task</h3>
+          <p>When to fine-tune, LoRA vs QLoRA, datasets, evaluation, risks, and beginner workflow.</p>
+        </a>
+      </div>
+    </section>
+
+    <div class="footer">Maintained as a static GitHub Pages site.</div>
+  </div>
+</body>
+</html>

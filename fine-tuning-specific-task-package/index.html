@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fine-Tuning for a Specific Task</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="eyebrow">Offline Learning Package</div>
+        <h1>Fine-Tuning for a Specific Task</h1>
+        <p>How to adapt models with discipline, data quality, and evaluation rigor.</p>
+      </div>
+
+      <nav class="nav" aria-label="Section navigation">
+        <a href="#overview">Overview</a>
+        <a href="#decision">Fine-tune vs Prompting vs RAG</a>
+        <a href="#methods">Full FT vs LoRA vs QLoRA</a>
+        <a href="#data">Dataset Design & Labeling</a>
+        <a href="#splits">Train / Validation / Test</a>
+        <a href="#formatting">Formatting Training Data</a>
+        <a href="#hyperparameters">Hyperparameters</a>
+        <a href="#hardware">Hardware & Cost</a>
+        <a href="#workflow">Training Workflow</a>
+        <a href="#evaluation">Evaluation</a>
+        <a href="#risks">Overfitting & Forgetting</a>
+        <a href="#deployment">Deployment & Monitoring</a>
+        <a href="#mistakes">Common Mistakes</a>
+        <a href="#recipe">Beginner Recipe</a>
+        <a href="#checklist">Final Checklist</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <header class="hero" id="overview">
+        <div class="hero-copy">
+          <span class="pill">Practical • Detailed • Self-contained</span>
+          <h2>Fine-tuning is not the first tool you should reach for.</h2>
+          <p>
+            The best fine-tuning projects start with a clear business task, a dataset that reflects real-world usage,
+            and an evaluation plan defined before training begins. This package teaches the full decision process,
+            not just the training knobs.
+          </p>
+        </div>
+        <div class="hero-card">
+          <h3>Core idea</h3>
+          <p>
+            Fine-tuning works best when you need the model to consistently exhibit a behavior, format, style, policy,
+            or domain skill that prompting alone cannot reliably produce at acceptable latency and cost.
+          </p>
+          <ul>
+            <li>Improve consistency</li>
+            <li>Reduce prompt size and inference cost</li>
+            <li>Teach narrow patterns or domain behaviors</li>
+            <li>Align outputs to a repetitive task</li>
+          </ul>
+        </div>
+      </header>
+
+      <section class="section" id="decision">
+        <h2>When to Fine-Tune vs Prompting vs RAG</h2>
+        <div class="grid three">
+          <article class="card">
+            <h3>Use prompting first</h3>
+            <p>Prompting is the default starting point. It is fast, cheap, reversible, and ideal for testing task framing before collecting a dataset.</p>
+            <ul>
+              <li>Good when the base model already knows the task</li>
+              <li>Useful for prototyping format instructions</li>
+              <li>Low operational risk</li>
+              <li>Best for quickly testing whether the task is even feasible</li>
+            </ul>
+          </article>
+          <article class="card accent">
+            <h3>Use RAG when knowledge changes</h3>
+            <p>Retrieval-augmented generation is the right choice when the main problem is missing or stale information, not missing behavior.</p>
+            <ul>
+              <li>Policies, manuals, legal docs, product catalogs, support articles</li>
+              <li>Frequently changing knowledge bases</li>
+              <li>Need citation or traceability to source documents</li>
+              <li>Want to avoid retraining every time facts change</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Use fine-tuning when behavior is the bottleneck</h3>
+            <p>Fine-tuning is appropriate when the model needs stable habits, a fixed response structure, or domain-specific output behavior at scale.</p>
+            <ul>
+              <li>Consistent structured extraction or classification</li>
+              <li>Reliable tone, style, or policy application</li>
+              <li>Task-specific transformations and generation patterns</li>
+              <li>Lower prompt overhead in production</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="callout">
+          <strong>Rule of thumb:</strong> if the model fails because it lacks facts, use RAG. If it fails because it lacks behavioral consistency, consider fine-tuning. If you have not yet proven the task with prompting, do that first.
+        </div>
+      </section>
+
+      <section class="section" id="methods">
+        <h2>Full Fine-Tuning vs LoRA vs QLoRA</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>What changes</th>
+                <th>Pros</th>
+                <th>Tradeoffs</th>
+                <th>Best use</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Full fine-tuning</td>
+                <td>All or most model weights</td>
+                <td>Maximum adaptation power</td>
+                <td>Most expensive, most memory, highest risk of forgetting</td>
+                <td>Large-scale specialized adaptation with strong infra</td>
+              </tr>
+              <tr>
+                <td>LoRA</td>
+                <td>Small low-rank adapter matrices</td>
+                <td>Much cheaper, easier to train and store</td>
+                <td>Less expressive than full FT in some cases</td>
+                <td>Most practical starting point for task adaptation</td>
+              </tr>
+              <tr>
+                <td>QLoRA</td>
+                <td>LoRA adapters on quantized base model</td>
+                <td>Very memory efficient, accessible on smaller hardware</td>
+                <td>More implementation complexity, possible quality ceiling</td>
+                <td>Budget-friendly experimentation and iteration</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <h3>Full fine-tuning</h3>
+            <p>Use only when the task requires broad model reconfiguration and you have the hardware, engineering maturity, and evaluation coverage to support it. This is often excessive for early-stage projects.</p>
+          </article>
+          <article class="card">
+            <h3>LoRA / QLoRA</h3>
+            <p>These are the practical defaults for most teams. They enable fast iteration, lower cost, and safer experiments. If you are learning, start here unless a strong reason pushes you to full FT.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="data">
+        <h2>Dataset Design and Labeling</h2>
+        <div class="grid two">
+          <article class="card">
+            <h3>What makes a good dataset</h3>
+            <ul>
+              <li><strong>Task alignment:</strong> every sample should teach the target behavior</li>
+              <li><strong>Coverage:</strong> include common, edge, and failure cases</li>
+              <li><strong>Consistency:</strong> labels and output style must follow the same rules</li>
+              <li><strong>Difficulty balance:</strong> mix easy, medium, and hard examples</li>
+              <li><strong>Realism:</strong> train on examples that resemble production inputs</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Labeling discipline</h3>
+            <ul>
+              <li>Write an annotation guide before labeling at scale</li>
+              <li>Define edge-case rules explicitly</li>
+              <li>Use double-labeling for ambiguous samples when possible</li>
+              <li>Track disagreements and resolve them into clearer policy</li>
+              <li>Version your labeling rules and datasets</li>
+            </ul>
+          </article>
+        </div>
+        <div class="card wide">
+          <h3>Dataset strategy by task type</h3>
+          <p><strong>Classification:</strong> label balance matters. Ensure rare but important classes are represented.</p>
+          <p><strong>Structured extraction:</strong> include messy inputs, typos, partial information, and explicit “not found” cases.</p>
+          <p><strong>Generation:</strong> high-quality targets matter more than sheer volume. The model learns your output style and decision boundaries from the examples you provide.</p>
+          <p><strong>Instruction following:</strong> make prompts diverse while outputs remain policy-consistent.</p>
+        </div>
+      </section>
+
+      <section class="section" id="splits">
+        <h2>Train / Validation / Test Splits</h2>
+        <div class="grid three">
+          <article class="card">
+            <h3>Train</h3>
+            <p>Used to update model parameters. This is where the model learns patterns.</p>
+          </article>
+          <article class="card">
+            <h3>Validation</h3>
+            <p>Used during training for model selection, early stopping, and hyperparameter tuning.</p>
+          </article>
+          <article class="card">
+            <h3>Test</h3>
+            <p>Used only at the end for final unbiased performance measurement.</p>
+          </article>
+        </div>
+        <div class="callout">
+          <strong>Avoid leakage:</strong> if near-duplicate samples appear across train and test, your evaluation becomes overly optimistic. Group related items before splitting.
+        </div>
+        <ul class="bullet-columns">
+          <li>Common split starting point: 80 / 10 / 10</li>
+          <li>For small datasets, consider cross-validation or repeated split analysis</li>
+          <li>Use time-based splits if production data changes over time</li>
+          <li>Preserve class distribution when relevant</li>
+          <li>Hold out especially difficult edge cases for honest evaluation</li>
+        </ul>
+      </section>
+
+      <section class="section" id="formatting">
+        <h2>Formatting Training Data</h2>
+        <div class="grid two">
+          <article class="card">
+            <h3>Instruction tuning format</h3>
+            <pre><code>{
+  "messages": [
+    {"role": "system", "content": "You extract invoice fields."},
+    {"role": "user", "content": "Invoice text here..."},
+    {"role": "assistant", "content": "{\"invoice_id\":\"123\",\"total\":\"49.99\"}"}
+  ]
+}</code></pre>
+          </article>
+          <article class="card">
+            <h3>Completion-style format</h3>
+            <pre><code>{
+  "prompt": "Classify sentiment: I waited 40 minutes and support fixed nothing.",
+  "completion": "negative"
+}</code></pre>
+          </article>
+        </div>
+        <div class="card wide">
+          <h3>Formatting principles</h3>
+          <ul>
+            <li>Keep the schema identical across samples</li>
+            <li>Normalize whitespace, casing, and JSON formatting where appropriate</li>
+            <li>Make outputs deterministic when possible</li>
+            <li>Include explicit abstain or unknown outputs if the real task needs them</li>
+            <li>Do not teach contradictory behaviors in different records</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section" id="hyperparameters">
+        <h2>Hyperparameters That Matter</h2>
+        <div class="grid three">
+          <article class="card">
+            <h3>Learning rate</h3>
+            <p>Too high and the model destabilizes or forgets prior ability. Too low and training becomes slow or ineffective.</p>
+          </article>
+          <article class="card">
+            <h3>Batch size</h3>
+            <p>Larger effective batch sizes can stabilize training, often using gradient accumulation when memory is limited.</p>
+          </article>
+          <article class="card">
+            <h3>Epochs</h3>
+            <p>Too few and the model underfits. Too many and it memorizes training patterns instead of generalizing.</p>
+          </article>
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <h3>Other knobs</h3>
+            <ul>
+              <li>Warmup steps</li>
+              <li>Weight decay</li>
+              <li>Sequence length</li>
+              <li>LoRA rank, alpha, dropout</li>
+              <li>Scheduler type</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Practical guidance</h3>
+            <p>Change one major variable at a time. Log every run. The value of training comes from systematic comparison, not random tweaking.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="hardware">
+        <h2>Hardware Needs and Cost Thinking</h2>
+        <div class="card wide">
+          <p>
+            Hardware depends on model size, sequence length, batch size, precision, and training method. Full fine-tuning large models can require multiple high-memory GPUs. LoRA and QLoRA dramatically reduce memory pressure and make learning projects feasible on modest setups.
+          </p>
+        </div>
+        <div class="grid three">
+          <article class="card">
+            <h3>Budget path</h3>
+            <p>Use a small instruct model plus QLoRA for experimentation and pipeline validation.</p>
+          </article>
+          <article class="card">
+            <h3>Professional path</h3>
+            <p>Use LoRA or full FT on stronger GPUs once the dataset and evaluation framework are proven.</p>
+          </article>
+          <article class="card">
+            <h3>Hidden costs</h3>
+            <p>Labeling, cleaning, storage, experiment tracking, failed runs, and evaluation labor often matter more than GPU rental alone.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="workflow">
+        <h2>End-to-End Training Workflow</h2>
+        <ol class="timeline">
+          <li><strong>Define the task</strong> — specify input, output, failure modes, and business success criteria.</li>
+          <li><strong>Baseline with prompting</strong> — test if training is even necessary.</li>
+          <li><strong>Design the dataset</strong> — collect representative examples and create labeling rules.</li>
+          <li><strong>Split the data</strong> — preserve unbiased validation and testing.</li>
+          <li><strong>Choose method</strong> — typically LoRA or QLoRA first.</li>
+          <li><strong>Train a small pilot</strong> — verify pipeline and look for obvious defects.</li>
+          <li><strong>Evaluate thoroughly</strong> — metrics plus manual review on edge cases.</li>
+          <li><strong>Refine data, not just settings</strong> — many failures are dataset problems, not optimizer problems.</li>
+          <li><strong>Select the best checkpoint</strong> — based on validation and practical utility.</li>
+          <li><strong>Deploy carefully</strong> — canary, monitor, compare against baseline.</li>
+        </ol>
+      </section>
+
+      <section class="section" id="evaluation">
+        <h2>Evaluation: The Most Important Part</h2>
+        <div class="grid two">
+          <article class="card">
+            <h3>Quantitative evaluation</h3>
+            <ul>
+              <li>Accuracy, precision, recall, F1 for classification</li>
+              <li>Exact match, BLEU, ROUGE, or task-specific metrics when appropriate</li>
+              <li>Schema validity for structured outputs</li>
+              <li>Latency and token cost in production-like settings</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Qualitative evaluation</h3>
+            <ul>
+              <li>Human review of mistakes</li>
+              <li>Edge-case audits</li>
+              <li>Comparison against prompt-only baseline</li>
+              <li>Robustness to noisy, incomplete, or adversarial inputs</li>
+            </ul>
+          </article>
+        </div>
+        <div class="callout">
+          <strong>Critical principle:</strong> never declare success from training loss alone. A lower loss can still produce a worse production model if the behavior drifts away from your actual task needs.
+        </div>
+      </section>
+
+      <section class="section" id="risks">
+        <h2>Overfitting and Catastrophic Forgetting</h2>
+        <div class="grid two">
+          <article class="card">
+            <h3>Overfitting</h3>
+            <p>The model learns the training examples too specifically and performs poorly on new inputs.</p>
+            <ul>
+              <li>Symptoms: rising train performance, flat or worse validation performance</li>
+              <li>Causes: too many epochs, narrow dataset, duplicate-heavy data</li>
+              <li>Mitigations: better splits, fewer epochs, more diverse data, early stopping</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Catastrophic forgetting</h3>
+            <p>The model loses general capabilities while learning a narrow task too aggressively.</p>
+            <ul>
+              <li>Symptoms: strong task gains but broader decline in reasoning or language behavior</li>
+              <li>Causes: aggressive learning rate, overly narrow data, full FT without safeguards</li>
+              <li>Mitigations: parameter-efficient methods, smaller LR, mixed datasets, broader evaluation suite</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="deployment">
+        <h2>Deployment and Monitoring</h2>
+        <div class="grid three">
+          <article class="card">
+            <h3>Before launch</h3>
+            <ul>
+              <li>Benchmark against baseline</li>
+              <li>Validate format compliance</li>
+              <li>Test safety and abstention behavior</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>During launch</h3>
+            <ul>
+              <li>Canary rollout</li>
+              <li>A/B comparison with prompt-only or previous model</li>
+              <li>Track failures by category</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>After launch</h3>
+            <ul>
+              <li>Monitor drift in inputs and outputs</li>
+              <li>Collect hard failures for next dataset version</li>
+              <li>Retrain only when evidence supports it</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="mistakes">
+        <h2>Common Mistakes</h2>
+        <div class="card wide">
+          <ul class="mistakes">
+            <li>Fine-tuning before proving the task with prompting</li>
+            <li>Training on low-quality labels or contradictory targets</li>
+            <li>Using test data during iteration and ruining evaluation integrity</li>
+            <li>Ignoring edge cases and abstain behavior</li>
+            <li>Trying to fix a knowledge problem with fine-tuning instead of RAG</li>
+            <li>Assuming more data always beats better data</li>
+            <li>Watching loss but not measuring real task success</li>
+            <li>Deploying without rollback, monitoring, or baseline comparison</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section" id="recipe">
+        <h2>A Practical Beginner Recipe</h2>
+        <div class="recipe">
+          <div class="step"><span>1</span><p>Choose one narrow task, such as support-ticket classification or extracting invoice fields.</p></div>
+          <div class="step"><span>2</span><p>Create a prompt-only baseline and collect examples where it fails.</p></div>
+          <div class="step"><span>3</span><p>Prepare 200–2,000 clean, representative examples with a strict labeling guide.</p></div>
+          <div class="step"><span>4</span><p>Split data into train, validation, and test without leakage.</p></div>
+          <div class="step"><span>5</span><p>Start with LoRA or QLoRA on a small instruct model.</p></div>
+          <div class="step"><span>6</span><p>Run a small pilot first to confirm formatting, loss behavior, and output quality.</p></div>
+          <div class="step"><span>7</span><p>Evaluate against the baseline using both metrics and manual review.</p></div>
+          <div class="step"><span>8</span><p>Fix the dataset before chasing fancy hyperparameter changes.</p></div>
+          <div class="step"><span>9</span><p>Deploy gradually, monitor errors, and feed real failures into the next data version.</p></div>
+        </div>
+      </section>
+
+      <section class="section" id="checklist">
+        <h2>Final Checklist</h2>
+        <div class="grid two">
+          <article class="card">
+            <h3>Before training</h3>
+            <ul>
+              <li>Clear task definition</li>
+              <li>Prompt baseline measured</li>
+              <li>Annotation guide written</li>
+              <li>Data cleaned and deduplicated</li>
+              <li>Train / validation / test split complete</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Before deployment</h3>
+            <ul>
+              <li>Best checkpoint selected by validation, not guesswork</li>
+              <li>Test set preserved until final review</li>
+              <li>Edge cases manually audited</li>
+              <li>Rollback and monitoring ready</li>
+              <li>Known limitations documented</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <p>Offline package created for learning and operational planning. Designed to be readable without internet access.</p>
+      </footer>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

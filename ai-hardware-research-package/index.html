@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Hardware Research Package</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .quick-start,
+    .glossary-grid,
+    .term-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .quick-start {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin: 20px 0;
+    }
+
+    .mini-card,
+    .term-card,
+    .plain-note {
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 18px;
+      background: rgba(15, 23, 42, 0.82);
+      box-shadow: 0 20px 50px rgba(2, 8, 23, 0.35);
+    }
+
+    .mini-card,
+    .plain-note,
+    .term-card {
+      padding: 18px;
+    }
+
+    .mini-card p,
+    .term-card p,
+    .plain-note p,
+    .term-card li,
+    .helper-list li,
+    .glossary-jump a {
+      color: #96a5c4;
+    }
+
+    .mini-card strong,
+    .term-card strong,
+    .plain-note strong,
+    .term-card summary {
+      color: #e5eefb;
+    }
+
+    .glossary-grid {
+      grid-template-columns: 1.05fr 1.95fr;
+      margin-top: 18px;
+    }
+
+    .glossary-jump {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+      position: sticky;
+      top: 24px;
+    }
+
+    .glossary-jump a {
+      text-decoration: none;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(124, 156, 255, 0.08);
+      border: 1px solid rgba(124, 156, 255, 0.16);
+    }
+
+    .glossary-jump a:hover,
+    .glossary-jump a:focus-visible {
+      color: #e5eefb;
+      border-color: rgba(124, 156, 255, 0.32);
+      outline: none;
+    }
+
+    .term-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .term-card {
+      line-height: 1.65;
+    }
+
+    .term-card h5 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }
+
+    .term-card .tag {
+      display: inline-block;
+      margin-bottom: 10px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.12);
+      color: #38bdf8;
+      font-size: 0.76rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .plain-note {
+      margin: 18px 0;
+      background: linear-gradient(135deg, rgba(52, 211, 153, 0.08), rgba(56, 189, 248, 0.08));
+    }
+
+    .helper-list {
+      margin: 0;
+      padding-left: 1.2rem;
+    }
+
+    .inline-term {
+      border-bottom: 1px dotted rgba(124, 156, 255, 0.9);
+      cursor: help;
+      color: #dbe8ff;
+    }
+
+    .equation-line {
+      margin: 16px 0;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(30, 41, 59, 0.62);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      color: #d6e4fb;
+    }
+
+    .section-anchor {
+      scroll-margin-top: 24px;
+    }
+
+    @media (max-width: 1100px) {
+      .quick-start,
+      .glossary-grid,
+      .term-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .glossary-jump {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">AI</div>
+        <div>
+          <p class="eyebrow">Offline Learning Package</p>
+          <h1>AI Hardware for Self-Hosting</h1>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Section navigation">
+        <button class="nav-link active" data-target="summary">Executive Summary</button>
+        <button class="nav-link" data-target="glossary">Glossary</button>
+        <button class="nav-link" data-target="cpu">CPU</button>
+        <button class="nav-link" data-target="ram">RAM</button>
+        <button class="nav-link" data-target="gpu">GPU &amp; VRAM</button>
+        <button class="nav-link" data-target="storage">Storage</button>
+        <button class="nav-link" data-target="pcie">PCIe &amp; Motherboard</button>
+        <button class="nav-link" data-target="cooling">Cooling &amp; Power</button>
+        <button class="nav-link" data-target="workloads">Inference vs Fine-Tuning</button>
+        <button class="nav-link" data-target="quantization">Quantization</button>
+        <button class="nav-link" data-target="bottlenecks">Bottlenecks</button>
+        <button class="nav-link" data-target="tiers">Build Tiers</button>
+        <button class="nav-link" data-target="checklist">Buying Checklist</button>
+      </nav>
+
+      <div class="sidebar-card">
+        <h2>Fast Rule of Thumb</h2>
+        <p>
+          For local AI, <strong>VRAM is usually the first hard limit</strong>, system RAM is the second,
+          and storage speed affects convenience more than raw tokens/sec.
+        </p>
+        <p>
+          If a term feels unfamiliar, jump to <strong>Glossary</strong>. This package now explains the jargon in plain English.
+        </p>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Practical buyer education</p>
+          <h2>How to choose hardware for local models without wasting money</h2>
+          <p class="lede">
+            This package explains which components matter most for running, serving, and fine-tuning AI
+            models at home or in a small office. It is written to work offline, keep the dark visual style,
+            and make the vocabulary understandable for newcomers instead of assuming prior jargon knowledge.
+          </p>
+        </div>
+        <div class="hero-grid">
+          <div class="metric-card">
+            <span class="metric-label">Primary constraint</span>
+            <strong>GPU VRAM</strong>
+            <p>Think of VRAM as the model's immediate workbench: if the needed pieces do not fit there, speed drops fast.</p>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Most overlooked</span>
+            <strong>PCIe lanes</strong>
+            <p>They are the roads connecting GPUs, SSDs, and other devices. Too few lanes creates traffic jams later.</p>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Best value move</span>
+            <strong>Match build to workload</strong>
+            <p>A machine for casual inference is not the same machine you would design for serious training or tuning.</p>
+          </div>
+        </div>
+      </header>
+
+      <section id="summary" class="panel active">
+        <h3>Executive Summary</h3>
+        <div class="plain-note">
+          <strong>Plain English:</strong> when people say a machine is "good for AI," they usually mean it can hold the model in memory,
+          move data around without choking, and stay cool enough to keep performing at full speed.
+        </div>
+
+        <div class="quick-start">
+          <article class="mini-card">
+            <h4>Step 1: Know the job</h4>
+            <p>Are you mostly doing <span class="inline-term" title="Using a trained model to generate answers or outputs.">inference</span>,
+            building a retrieval system, or actually changing a model with training or fine-tuning?</p>
+          </article>
+          <article class="mini-card">
+            <h4>Step 2: Size memory first</h4>
+            <p>Start with <span class="inline-term" title="Memory attached to the GPU; this is where model data wants to live for fast work.">VRAM</span>,
+            then check system RAM. Memory limits show up before many other limits do.</p>
+          </article>
+          <article class="mini-card">
+            <h4>Step 3: Protect the basics</h4>
+            <p>Good cooling, enough power, and a board with room to grow are what turn a benchmark build into a dependable machine.</p>
+          </article>
+        </div>
+
+        <div class="grid two">
+          <article class="card">
+            <h4>What matters most</h4>
+            <ul>
+              <li><strong>GPU VRAM</strong> decides which models fit comfortably and whether you rely on CPU/RAM offload.</li>
+              <li><strong>System RAM</strong> matters for data loading, CPU inference, embeddings pipelines, and buffering large checkpoints.</li>
+              <li><strong>CPU</strong> matters for orchestration, preprocessing, compression, vector databases, and CPU-side inference.</li>
+              <li><strong>Storage</strong> affects load times, dataset handling, and scratch space for training artifacts.</li>
+              <li><strong>Motherboard/PCIe</strong> determines whether your build can grow into multi-GPU or high-speed storage later.</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h4>Practical decision sequence</h4>
+            <ol>
+              <li>Choose your workload: chat inference, coding assistant, embeddings, image generation, fine-tuning, or mixed use.</li>
+              <li>Choose model class and target quantization.</li>
+              <li>Estimate VRAM first, then RAM, then storage, then CPU.</li>
+              <li>Only after that choose case, PSU, cooling, and motherboard around the expansion plan.</li>
+              <li>Budget for reliability: power headroom, thermals, and noise matter in real daily use.</li>
+            </ol>
+          </article>
+        </div>
+
+        <div class="callout">
+          <strong>Reality check:</strong> A balanced local AI box is usually better than an overbought CPU system with an underpowered GPU.
+          If your main goal is serving modern LLMs quickly, put your dollars where the tensor math lives.
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Use Case</th>
+                <th>Most Important Part</th>
+                <th>Secondary Concern</th>
+                <th>Typical Failure Mode</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Single-user local chat</td>
+                <td>VRAM capacity</td>
+                <td>SSD for model loads</td>
+                <td>Model does not fit without slow offload</td>
+              </tr>
+              <tr>
+                <td>Embeddings / retrieval</td>
+                <td>RAM + SSD</td>
+                <td>CPU core count</td>
+                <td>Indexing and ingestion become sluggish</td>
+              </tr>
+              <tr>
+                <td>Image generation</td>
+                <td>GPU compute + VRAM</td>
+                <td>Cooling</td>
+                <td>Thermal throttling during long runs</td>
+              </tr>
+              <tr>
+                <td>LoRA / QLoRA fine-tuning</td>
+                <td>VRAM + RAM</td>
+                <td>Storage scratch space</td>
+                <td>OOM errors, low batch size, slow checkpointing</td>
+              </tr>
+              <tr>
+                <td>Multi-model home lab</td>
+                <td>Motherboard lanes &amp; PSU</td>
+                <td>Case airflow</td>
+                <td>Expansion blocked by physical or electrical limits</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="glossary" class="panel">
+        <h3>Glossary</h3>
+        <div class="callout subtle">
+          <strong>How to use this section:</strong> if you hit an unfamiliar term elsewhere in the package, come back here.
+          The definitions are intentionally plain-English, with analogies, so you can keep reading without feeling locked out.
+        </div>
+
+        <div class="glossary-grid">
+          <aside class="mini-card glossary-jump">
+            <strong>Jump by topic</strong>
+            <a href="#gl-core">Core AI workflow terms</a>
+            <a href="#gl-memory">Memory and speed terms</a>
+            <a href="#gl-training">Training and tuning terms</a>
+            <a href="#gl-hardware">Hardware and platform terms</a>
+            <a href="#gl-software">Software ecosystem terms</a>
+          </aside>
+
+          <div>
+            <div class="plain-note">
+              <strong>Big picture analogy:</strong> running AI is like operating a kitchen. The model is the recipe and ingredients,
+              VRAM is the countertop space, RAM is the pantry, storage is the fridge, the GPU is the line cook, and the CPU is the manager doing prep,
+              coordination, and cleanup.
+            </div>
+
+            <div id="gl-core" class="section-anchor">
+              <h4>Core AI workflow terms</h4>
+              <div class="term-grid">
+                <article class="term-card"><span class="tag">Core</span><h5>Inference</h5><p>Using a model that is already trained to produce an answer, image, summary, or prediction. It is the "asking the model to do its job" phase, not the teaching phase.</p></article>
+                <article class="term-card"><span class="tag">Core</span><h5>Training</h5><p>Teaching a model from data by repeatedly adjusting its internal numbers. This is the expensive "schooling" phase where the model learns patterns.</p></article>
+                <article class="term-card"><span class="tag">Core</span><h5>Fine-tuning</h5><p>Giving an already-trained model extra lessons on a narrower task. Instead of educating someone from kindergarten, you are giving a professional a specialized workshop.</p></article>
+                <article class="term-card"><span class="tag">Core</span><h5>Tokenization</h5><p>Breaking text into smaller pieces a model can handle. A token is not always a whole word; think of it as the model's own preferred bite-size chunks.</p></article>
+                <article class="term-card"><span class="tag">Core</span><h5>Context length</h5><p>How much text the model can keep in active view at once. It is like the size of the whiteboard the model can look at while answering.</p></article>
+                <article class="term-card"><span class="tag">Core</span><h5>Embeddings</h5><p>Numerical fingerprints for text, images, or other data. They let software compare meaning, not just exact wording, which is why they are useful for search and retrieval.</p></article>
+                <article class="term-card"><span class="tag">Core</span><h5>RAG</h5><p>Short for retrieval-augmented generation. Instead of trusting the model to remember everything, you first fetch helpful documents and then let the model answer using them.</p></article>
+                <article class="term-card"><span class="tag">Core</span><h5>Concurrency</h5><p>How many requests or users a system can handle at the same time. One fast answer for one person is different from serving many people together.</p></article>
+              </div>
+            </div>
+
+            <div id="gl-memory" class="section-anchor">
+              <h4>Memory and speed terms</h4>
+              <div class="term-grid">
+                <article class="term-card"><span class="tag">Memory</span><h5>VRAM</h5><p>Memory on the graphics card. This is the premium workspace for AI math because the GPU can reach it very quickly.</p></article>
+                <article class="term-card"><span class="tag">Memory</span><h5>RAM</h5><p>Main system memory connected to the CPU. Bigger than VRAM in many PCs, but farther away from the GPU and usually slower for model execution.</p></article>
+                <article class="term-card"><span class="tag">Memory</span><h5>KV cache</h5><p>A memory structure that stores parts of earlier text processing so the model does not redo all the same work every token. Longer chats make this cache grow.</p></article>
+                <article class="term-card"><span class="tag">Memory</span><h5>Activations</h5><p>Temporary values created while the model is thinking through a request. They are like scratch notes produced during each step of computation.</p></article>
+                <article class="term-card"><span class="tag">Memory</span><h5>Bandwidth</h5><p>How much data can move per second. Imagine the width of a highway: a wider road moves more cars at once.</p></article>
+                <article class="term-card"><span class="tag">Memory</span><h5>Latency</h5><p>How long it takes before work begins or data arrives. Think of it as the delay before the first car starts moving, not the total number of cars per hour.</p></article>
+                <article class="term-card"><span class="tag">Memory</span><h5>Throughput</h5><p>Total work completed over time. In AI serving, this might mean tokens per second or requests handled per minute.</p></article>
+                <article class="term-card"><span class="tag">Memory</span><h5>Offloading</h5><p>Moving some model data out of VRAM into RAM or storage because GPU memory is too small. It can save you from failure, but it usually slows things down.</p></article>
+                <article class="term-card"><span class="tag">Memory</span><h5>Batch size</h5><p>How many examples or requests are processed together in one step. Bigger batches can improve efficiency, but they consume more memory.</p></article>
+                <article class="term-card"><span class="tag">Memory</span><h5>Precision</h5><p>How many bits are used to store numbers. More precision is like more decimal detail; less precision saves memory and can be faster.</p></article>
+              </div>
+            </div>
+
+            <div id="gl-training" class="section-anchor">
+              <h4>Training and tuning terms</h4>
+              <div class="term-grid">
+                <article class="term-card"><span class="tag">Tuning</span><h5>LoRA</h5><p>Low-Rank Adaptation. A way to fine-tune by learning a small add-on instead of rewriting the whole model. It is like adding a specialized attachment to a tool instead of rebuilding the tool itself.</p></article>
+                <article class="term-card"><span class="tag">Tuning</span><h5>QLoRA</h5><p>A LoRA-style method that keeps the base model in a quantized form to reduce memory use. It is popular because it makes fine-tuning possible on less extreme hardware.</p></article>
+                <article class="term-card"><span class="tag">Tuning</span><h5>Gradients</h5><p>Signals that tell training which direction to adjust the model's numbers. If the loss says "wrong answer," gradients help say how to correct it.</p></article>
+                <article class="term-card"><span class="tag">Tuning</span><h5>Optimizer state</h5><p>Extra memory the training algorithm keeps so it can update weights intelligently. This is one reason training needs much more memory than simple inference.</p></article>
+                <article class="term-card"><span class="tag">Tuning</span><h5>Checkpoint</h5><p>A saved snapshot of the model during training or fine-tuning. It is your recovery point if a run crashes or if you want to compare versions later.</p></article>
+                <article class="term-card"><span class="tag">Tuning</span><h5>Dataloader</h5><p>The component that feeds training data to the model. If it is slow, your expensive GPU can sit idle waiting for the next batch.</p></article>
+                <article class="term-card"><span class="tag">Tuning</span><h5>Augmentation</h5><p>Creating modified versions of training data to improve robustness. For images this might mean flips or crops; for text it can mean controlled paraphrasing or formatting changes.</p></article>
+                <article class="term-card"><span class="tag">Tuning</span><h5>Model weights</h5><p>The learned numbers inside the model. They are the stored knowledge and behavior patterns the model uses to respond.</p></article>
+                <article class="term-card"><span class="tag">Tuning</span><h5>Parameter</h5><p>A single adjustable number inside the model. When people say a model is 7B or 70B, they mean billions of these numbers.</p></article>
+                <article class="term-card"><span class="tag">Tuning</span><h5>Tensor parallelism</h5><p>Splitting parts of one model's work across multiple GPUs. It is like several cooks sharing one big recipe at the same time.</p></article>
+              </div>
+            </div>
+
+            <div id="gl-hardware" class="section-anchor">
+              <h4>Hardware and platform terms</h4>
+              <div class="term-grid">
+                <article class="term-card"><span class="tag">Hardware</span><h5>CPU</h5><p>The general-purpose processor. It handles operating system work, coordination, preprocessing, and many jobs that are not giant parallel math problems.</p></article>
+                <article class="term-card"><span class="tag">Hardware</span><h5>GPU</h5><p>A processor built for doing many similar calculations at once. AI workloads love this because matrix math involves huge amounts of parallel work.</p></article>
+                <article class="term-card"><span class="tag">Hardware</span><h5>Tensor</h5><p>A structured block of numbers, often arranged like a multidimensional spreadsheet. Modern AI math is mostly moving and multiplying tensors.</p></article>
+                <article class="term-card"><span class="tag">Hardware</span><h5>Tensor cores</h5><p>Special GPU units built to accelerate common AI math. They are like dedicated fast lanes for the number patterns neural networks use most.</p></article>
+                <article class="term-card"><span class="tag">Hardware</span><h5>PCIe</h5><p>The connection standard linking GPUs, NVMe drives, and other expansion devices to the motherboard. More lanes usually means more room for high-speed devices.</p></article>
+                <article class="term-card"><span class="tag">Hardware</span><h5>Motherboard</h5><p>The main board connecting CPU, RAM, GPU, storage, and power delivery. It decides many upgrade limits even when flashy marketing focuses elsewhere.</p></article>
+                <article class="term-card"><span class="tag">Hardware</span><h5>Chipset</h5><p>Supporting logic on the motherboard platform that helps manage connectivity and features. It affects things like extra USB, storage, and lane-sharing behavior.</p></article>
+                <article class="term-card"><span class="tag">Hardware</span><h5>PSU</h5><p>Power supply unit. It converts wall power into stable power for your components. If it is weak or low quality, the whole build can become unreliable.</p></article>
+                <article class="term-card"><span class="tag">Hardware</span><h5>NVMe</h5><p>A fast storage interface commonly used by SSDs. For AI, it is great for model files, datasets, and checkpoint saves because it reduces waiting during load and save operations.</p></article>
+                <article class="term-card"><span class="tag">Hardware</span><h5>Thermal throttling</h5><p>When hardware intentionally slows itself down to stay safe because temperatures are too high. It is your machine saying, "I cannot keep sprinting in this heat."</p></article>
+              </div>
+            </div>
+
+            <div id="gl-software" class="section-anchor">
+              <h4>Software ecosystem and numeric formats</h4>
+              <div class="term-grid">
+                <article class="term-card"><span class="tag">Software</span><h5>CUDA</h5><p>NVIDIA's software platform for GPU computing. Many AI tools support CUDA first, which is one reason NVIDIA hardware is common in local AI setups.</p></article>
+                <article class="term-card"><span class="tag">Software</span><h5>ROCm</h5><p>AMD's GPU computing platform. It can work well, but software support is often narrower or less polished depending on the toolchain.</p></article>
+                <article class="term-card"><span class="tag">Numbers</span><h5>FP16</h5><p>16-bit floating point numbers. A common balance between memory savings and model quality for many GPU workloads.</p></article>
+                <article class="term-card"><span class="tag">Numbers</span><h5>BF16</h5><p>Bfloat16. Another 16-bit format designed to keep a wider range of values than FP16, which can help training stability on supported hardware.</p></article>
+                <article class="term-card"><span class="tag">Numbers</span><h5>INT8</h5><p>An 8-bit integer format often used in quantization. It cuts memory use compared with 16-bit formats, though quality and speed depend on implementation.</p></article>
+                <article class="term-card"><span class="tag">Numbers</span><h5>4-bit quantization</h5><p>Very compact model storage using four bits per value. This can make surprisingly large models fit on consumer GPUs, but there are tradeoffs in flexibility and sometimes output quality.</p></article>
+                <article class="term-card"><span class="tag">Numbers</span><h5>Quantization</h5><p>Reducing the number of bits used to store model values. It is like compressing a photo: smaller file, easier to carry, but sometimes with a quality cost.</p></article>
+                <article class="term-card"><span class="tag">Numbers</span><h5>Checkpointing (gradient checkpointing)</h5><p>A memory-saving training trick where some intermediate values are recomputed later instead of stored the whole time. You trade extra compute for lower memory use.</p></article>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="cpu" class="panel">
+        <h3>CPU</h3>
+        <div class="plain-note">
+          <strong>Plain English:</strong> the CPU is the organizer. Even if the GPU does the heavy AI math, the CPU still handles setup, routing, file work, and many support tasks.
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <h4>What the CPU actually does</h4>
+            <p>
+              In many GPU-heavy AI workflows, the CPU is not the main throughput engine, but it remains essential.
+              It handles request routing, token sampling logic, prompt assembly, document chunking, dataset preprocessing,
+              compression/decompression, vector database maintenance, and operating system tasks.
+            </p>
+            <p>
+              CPU importance increases when you run smaller models on CPU only, offload layers from GPU, maintain several
+              services at once, or do significant data wrangling around the model.
+            </p>
+          </article>
+          <article class="card">
+            <h4>What to prioritize</h4>
+            <ul>
+              <li>Prefer modern architectures with strong single-thread performance and decent multicore scaling.</li>
+              <li>For a dedicated single-GPU inference box, midrange CPUs are often enough.</li>
+              <li>For mixed workloads, fine-tuning pipelines, or heavy retrieval systems, more cores help.</li>
+              <li>Do not overspend on flagship CPUs if that money would be better spent on more VRAM.</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="card">
+          <h4>CPU guidance by scenario</h4>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Scenario</th>
+                  <th>CPU guidance</th>
+                  <th>Why</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Single-user LLM inference</td>
+                  <td>Strong midrange CPU</td>
+                  <td>Enough to feed the GPU and run the stack without wasting budget</td>
+                </tr>
+                <tr>
+                  <td>CPU-only experimentation</td>
+                  <td>More cores + large cache helps</td>
+                  <td>All inference and preprocessing stay on the CPU side</td>
+                </tr>
+                <tr>
+                  <td>Data prep / retrieval pipelines</td>
+                  <td>Higher core count is valuable</td>
+                  <td>Parsing, chunking, indexing, and ETL are CPU-heavy</td>
+                </tr>
+                <tr>
+                  <td>Future multi-GPU system</td>
+                  <td>Choose platform for lanes first</td>
+                  <td>The socket/platform may matter more than raw benchmark wins</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="ram" class="panel">
+        <h3>RAM</h3>
+        <div class="plain-note">
+          <strong>Plain English:</strong> RAM is your machine's general staging area. It cannot fully replace VRAM, but without enough of it the whole system starts tripping over itself.
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <h4>Why system RAM still matters</h4>
+            <p>
+              Even when the GPU does the main model math, system RAM supports model loading, tokenizer work, CPU offload,
+              retrieval pipelines, dataset caches, and operating system headroom. If you work with many documents or large
+              fine-tuning datasets, RAM pressure shows up quickly.
+            </p>
+          </article>
+          <article class="card">
+            <h4>Practical capacity ranges</h4>
+            <ul>
+              <li><strong>32 GB:</strong> acceptable floor for lighter single-user inference and development.</li>
+              <li><strong>64 GB:</strong> strong sweet spot for serious local AI, mixed tools, and occasional offload.</li>
+              <li><strong>128 GB+:</strong> useful for large datasets, CPU-heavy jobs, multiple services, and aggressive offload strategies.</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="callout subtle">
+          RAM is not a substitute for VRAM. It can help via offload, but once you spill too much model state out of VRAM,
+          interactive performance often drops sharply.
+        </div>
+      </section>
+
+      <section id="gpu" class="panel">
+        <h3>GPU &amp; VRAM</h3>
+        <div class="plain-note">
+          <strong>Plain English:</strong> if the GPU is the engine, VRAM is the engine bay space where the parts have to fit while the work is happening.
+        </div>
+        <div class="grid two">
+          <article class="card accent">
+            <h4>Why VRAM dominates decisions</h4>
+            <p>
+              For most local LLM and image workloads, the GPU is the most important performance component, and VRAM is the
+              most important GPU characteristic. Capacity determines whether weights, activations, KV cache, and optimizer
+              states fit cleanly enough to keep the workflow practical.
+            </p>
+            <p>
+              Raw compute matters too, but a very fast GPU with too little VRAM can be less useful than a slightly slower GPU
+              that fits the models you actually want to run.
+            </p>
+          </article>
+          <article class="card">
+            <h4>What VRAM affects</h4>
+            <ul>
+              <li>Model size at a given precision or quantization</li>
+              <li>Context length and KV cache growth</li>
+              <li>Batch size and concurrency</li>
+              <li>Whether fine-tuning is realistic or painful</li>
+              <li>Whether you need CPU/RAM offload, which usually costs speed</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="equation-line">
+          A useful beginner mental model: <strong>more users + longer prompts + bigger model = more memory pressure</strong>.
+          That is why a card that "fits the model" may still feel cramped in real use.
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>VRAM Class</th>
+                <th>Best Fit</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>8–12 GB</td>
+                <td>Small models, image generation entry point, lightweight experimentation</td>
+                <td>Usable, but easy to outgrow for modern local LLM ambitions</td>
+              </tr>
+              <tr>
+                <td>16 GB</td>
+                <td>Comfortable hobbyist tier, better room for 7B–13B class models with quantization</td>
+                <td>Much healthier for daily local use</td>
+              </tr>
+              <tr>
+                <td>24 GB</td>
+                <td>Strong enthusiast tier for serious inference and lighter fine-tuning approaches</td>
+                <td>Often a major practical breakpoint</td>
+              </tr>
+              <tr>
+                <td>48 GB+</td>
+                <td>Advanced labs, larger contexts, heavier tuning, multi-user serving</td>
+                <td>Usually expensive, but transformative for capability</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <h4>Important nuance</h4>
+          <p>
+            Model size is not the whole story. A model that barely fits may still be unpleasant if you need long context,
+            higher concurrency, or fine-tuning overhead. Leave margin instead of targeting the absolute theoretical minimum.
+          </p>
+        </div>
+      </section>
+
+      <section id="storage" class="panel">
+        <h3>Storage</h3>
+        <div class="plain-note">
+          <strong>Plain English:</strong> storage mostly changes waiting time and convenience, not the core intelligence of the machine.
+          Fast drives make loading, saving, and dataset work feel much less painful.
+        </div>
+        <div class="grid three">
+          <article class="card">
+            <h4>Capacity</h4>
+            <p>
+              Models, quantized variants, datasets, checkpoints, embeddings indexes, and experiment logs add up quickly.
+              A local AI workstation can consume terabytes faster than a typical gaming machine.
+            </p>
+          </article>
+          <article class="card">
+            <h4>Speed</h4>
+            <p>
+              Fast NVMe storage improves model loading, dataset shuffling, checkpoint saves, and general responsiveness.
+              It usually does not increase steady-state token generation as much as a better GPU does.
+            </p>
+          </article>
+          <article class="card">
+            <h4>Strategy</h4>
+            <p>
+              Use a fast primary NVMe drive for the OS, active models, and scratch work. Add a second SSD for archives,
+              datasets, and overflow if you plan to keep many model variants locally.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section id="pcie" class="panel">
+        <h3>PCIe &amp; Motherboard</h3>
+        <div class="plain-note">
+          <strong>Plain English:</strong> this is the part that determines how much room your build has to breathe and grow.
+          Great components can still feel boxed in by a weak platform.
+        </div>
+        <div class="card">
+          <h4>Why this matters more than people expect</h4>
+          <p>
+            Motherboard and platform decisions determine lane availability, slot spacing, memory support, networking,
+            and future expansion. If you think you may ever want multiple GPUs, faster networking, or several NVMe drives,
+            this is not the place to cut corners blindly.
+          </p>
+          <ul>
+            <li>Check physical slot spacing for thick GPUs.</li>
+            <li>Check how lanes are shared with M.2 slots and chipset devices.</li>
+            <li>Verify PSU connector access and case clearance for long cards.</li>
+            <li>Plan for BIOS maturity and stability, not just headline specs.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="cooling" class="panel">
+        <h3>Cooling &amp; Power</h3>
+        <div class="plain-note">
+          <strong>Plain English:</strong> AI workloads act more like a long-distance race than a short sprint.
+          If heat and power are not handled well, the machine slows down or becomes unstable.
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <h4>Cooling</h4>
+            <p>
+              AI workloads often run sustained compute for long periods. That means thermals are not a cosmetic concern.
+              Poor airflow leads to throttling, more fan noise, and reduced component longevity. Choose a case with real intake,
+              enough fan positions, and room around the GPU.
+            </p>
+          </article>
+          <article class="card">
+            <h4>Power supply</h4>
+            <p>
+              Buy a quality PSU with efficiency, transient headroom, and future expansion in mind. Cheap or undersized power
+              supplies can become the most frustrating failure point in a GPU-heavy machine.
+            </p>
+          </article>
+        </div>
+
+        <div class="callout">
+          Sustained AI loads are closer to workstation behavior than short gaming bursts. Design for hours of heat, not minutes.
+        </div>
+      </section>
+
+      <section id="workloads" class="panel">
+        <h3>Inference vs Fine-Tuning</h3>
+        <div class="equation-line">
+          <strong>Simple distinction:</strong> inference is <em>using</em> a model; fine-tuning is <em>changing</em> a model.
+          Changing it costs much more memory, storage, and patience.
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <h4>Inference-first machines</h4>
+            <ul>
+              <li>Prioritize VRAM and decent GPU compute.</li>
+              <li>CPU can be moderate as long as the system stays responsive.</li>
+              <li>Fast storage helps load models and maintain a smoother local experience.</li>
+              <li>Great for chat, coding assistants, embeddings, and image generation.</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h4>Fine-tuning-first machines</h4>
+            <ul>
+              <li>Need more VRAM headroom, more RAM, and more scratch storage.</li>
+              <li>Cooling and power delivery matter more because long runs are normal.</li>
+              <li>Data pipeline overhead makes CPU and storage more relevant.</li>
+              <li>Gradient checkpointing, LoRA, and QLoRA reduce requirements but do not erase them.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="quantization" class="panel">
+        <h3>Quantization</h3>
+        <div class="plain-note">
+          <strong>Plain English:</strong> quantization is a way of packing model numbers more tightly so the model takes less memory.
+          It is often the trick that makes local AI possible on consumer hardware.
+        </div>
+        <div class="card">
+          <h4>What it is</h4>
+          <p>
+            Quantization reduces the numerical precision used to store and sometimes compute model weights. In practice,
+            this can shrink memory usage dramatically, letting you run bigger models on less VRAM.
+          </p>
+          <p>
+            The tradeoff is usually some combination of reduced quality, reduced flexibility, or different performance
+            characteristics depending on format and tooling.
+          </p>
+        </div>
+
+        <div class="grid two">
+          <article class="card">
+            <h4>Why it matters for self-hosting</h4>
+            <ul>
+              <li>Makes local inference feasible on consumer hardware.</li>
+              <li>Lets you keep more models on one machine.</li>
+              <li>Can shift a build from impossible to practical.</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h4>What it does not magically solve</h4>
+            <ul>
+              <li>Context growth still consumes memory.</li>
+              <li>Fine-tuning overhead still exists.</li>
+              <li>Slow interconnects and offload penalties still hurt.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="bottlenecks" class="panel">
+        <h3>Bottlenecks</h3>
+        <div class="plain-note">
+          <strong>Plain English:</strong> a bottleneck is the part of the system that makes everything else wait.
+          The whole machine only feels as fast as its most painful delay.
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <h4>Common bottlenecks</h4>
+            <ul>
+              <li>Insufficient VRAM leading to offload or hard OOM errors</li>
+              <li>Too little RAM for datasets, retrieval, or CPU spillover</li>
+              <li>Thermal throttling from cramped cases or weak airflow</li>
+              <li>PCIe constraints in multi-GPU or storage-heavy builds</li>
+              <li>Undersized PSU during transient GPU spikes</li>
+              <li>Storage saturation when juggling large datasets and checkpoints</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h4>How to think about them</h4>
+            <p>
+              The slowest meaningful stage of your workflow becomes the perceived speed of the whole system. A fast GPU does
+              not rescue a machine that constantly swaps memory, overheats, or chokes on I/O during checkpoint saves.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section id="tiers" class="panel">
+        <h3>Build Tiers</h3>
+        <div class="plain-note">
+          <strong>Plain English:</strong> these are not rigid rules. They are practical starting points to help you avoid buying for a fantasy workload you will rarely run.
+        </div>
+        <div class="grid three">
+          <article class="card tier">
+            <span class="tier-tag">Tier 1</span>
+            <h4>Starter Inference Box</h4>
+            <p><strong>Who it fits:</strong> learning, small models, lightweight image work, local experimentation.</p>
+            <ul>
+              <li>Midrange CPU</li>
+              <li>32 GB RAM minimum</li>
+              <li>8–12 GB GPU acceptable, 16 GB better</li>
+              <li>1–2 TB NVMe</li>
+            </ul>
+          </article>
+          <article class="card tier">
+            <span class="tier-tag">Tier 2</span>
+            <h4>Serious Home Lab</h4>
+            <p><strong>Who it fits:</strong> daily local LLM use, coding assistant, embeddings, image generation, some tuning.</p>
+            <ul>
+              <li>Strong mainstream CPU</li>
+              <li>64 GB RAM sweet spot</li>
+              <li>16–24 GB GPU class</li>
+              <li>2–4 TB fast SSD capacity</li>
+            </ul>
+          </article>
+          <article class="card tier">
+            <span class="tier-tag">Tier 3</span>
+            <h4>Advanced Tuning Workstation</h4>
+            <p><strong>Who it fits:</strong> larger local models, heavier fine-tuning, multi-service labs, future expansion.</p>
+            <ul>
+              <li>Platform chosen for lanes and thermals</li>
+              <li>128 GB RAM common</li>
+              <li>24 GB to 48 GB+ GPU capacity or multi-GPU path</li>
+              <li>Large NVMe scratch + archive strategy</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="checklist" class="panel">
+        <h3>Buying Checklist</h3>
+        <div class="card">
+          <ol class="checklist">
+            <li>What exact workloads will I run weekly, not just someday?</li>
+            <li>What model sizes and context lengths do I actually care about?</li>
+            <li>How much VRAM do those targets need with a realistic safety margin?</li>
+            <li>Will I fine-tune or mostly infer?</li>
+            <li>Do I need room for a second GPU, extra NVMe drives, or faster networking?</li>
+            <li>Can my case, PSU, and motherboard support that growth path?</li>
+            <li>How much noise and heat can I tolerate in the real room where the machine lives?</li>
+            <li>Would a used workstation GPU or used enterprise platform improve value, and what are the reliability tradeoffs?</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <h4>Beginner safety check</h4>
+          <ul class="helper-list">
+            <li>If you do not know your exact workload yet, avoid overspending on CPU prestige and underbuying VRAM.</li>
+            <li>If you expect long chats or multiple users, do not size the system only for a tiny demo prompt.</li>
+            <li>If you might expand later, check motherboard spacing, PSU headroom, and storage slots before you buy.</li>
+          </ul>
+        </div>
+
+        <footer class="footer-note">
+          <p>
+            Bottom line: for local AI, buy the machine your real workflow needs, not the one that looks most impressive on a generic PC parts list.
+            Fit, thermals, power headroom, and upgrade paths matter almost as much as peak benchmark numbers.
+          </p>
+        </footer>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
