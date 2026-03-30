@@ -1,12 +1,14 @@
-<!doctype html>
+﻿<!doctype html>
     <html lang="en">
     <head>
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <title>Safety and Hallucinations</title>
       <link rel="stylesheet" href="../assets/styles.css" />
-    </head>
+      <script defer src="/ai-research-site/site-assets/site-search.js"></script>
+</head>
     <body>
+  <div data-site-search></div>
 
 <div class="page layout">
   <aside class="sidebar">
@@ -15,9 +17,10 @@
   </aside>
   <main class="content">
     <section class="hero"><div><span class="eyebrow">Risk and reliability</span><h1>Safety and Hallucinations</h1><p class="lead">LLMs are persuasive generators, not guaranteed truth engines. Hallucinations, prompt injection, unsafe actions, and data leakage are all system-level risks.</p></div><div class="hero-panel"><h3>Framing</h3><p>Safety is not one filter. It is a layered design problem across prompts, retrieval, tools, permissions, and evaluation.</p></div></section><section class="section"><h2>Why hallucinations happen</h2><p>The model is optimized to produce plausible continuations. If evidence is missing or weak, it may still answer confidently. That is why factual tasks often need grounding and verification.</p><div class="grid two"><div class="card"><h3>Fluent wrong answers</h3><p>Style and correctness are not the same.</p></div><div class="card"><h3>Task dependence</h3><p>Some tasks are inherently safer than others.</p></div></div></section><section class="section"><h2>Mitigation layers</h2><ul><li>Ground with retrieval or tools.</li><li>Constrain actions with validation and approvals.</li><li>Separate trusted instructions from untrusted retrieved text.</li><li>Use adversarial evals, not just happy-path tests.</li></ul></section>
-    <div class="footer"><a href="../serving-and-deployment-basics/index.html">Continue → Serving and Deployment Basics</a></div>
+    <div class="footer"><a href="../serving-and-deployment-basics/index.html">Continue â†’ Serving and Deployment Basics</a></div>
   </main>
 </div>
 
     </body>
     </html>
+

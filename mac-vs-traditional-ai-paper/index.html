@@ -1,12 +1,14 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mac vs Traditional PC/Server Hardware for AI Workloads</title>
   <link rel="stylesheet" href="styles.css">
+  <script defer src="/ai-research-site/site-assets/site-search.js"></script>
 </head>
 <body>
+  <div data-site-search></div>
   <div class="page-shell">
     <header class="hero">
       <div class="eyebrow">Offline Research Brief</div>
@@ -35,7 +37,7 @@
       <section>
         <h2>Executive Summary</h2>
         <p>If your goal is <strong>comfortable local AI usage, software development, prototyping, document and code assistance, and running larger quantized models quietly on a desk</strong>, high-memory Apple Silicon Macs are unusually compelling. Their unified memory architecture lets the CPU, GPU, and neural engines share one large memory pool, which can make a Mac with enough RAM capable of loading models that would not fit on a consumer GPU with limited VRAM.</p>
-        <p>If your goal is <strong>maximum framework support, fastest training and fine-tuning, multi-GPU scale-out, access to the mainstream tooling ecosystem, or best raw price/performance for heavy AI compute</strong>, traditional PC and server hardware—especially NVIDIA CUDA systems—remains the safer and more powerful choice.</p>
+        <p>If your goal is <strong>maximum framework support, fastest training and fine-tuning, multi-GPU scale-out, access to the mainstream tooling ecosystem, or best raw price/performance for heavy AI compute</strong>, traditional PC and server hardwareâ€”especially NVIDIA CUDA systemsâ€”remains the safer and more powerful choice.</p>
         <p>The key tradeoff is simple: <strong>Apple offers elegant integration and strong efficiency; traditional AI boxes offer flexibility, compatibility, and speed ceiling.</strong></p>
       </section>
 
@@ -96,7 +98,7 @@
         <div class="columns">
           <article class="card">
             <h3>Why unified memory matters</h3>
-            <p>In Apple Silicon systems, memory is not split into “RAM for the CPU” and “VRAM for the GPU.” Instead, one shared pool is available to the system. For AI, this can be a genuine advantage for model loading: a Mac with 64 GB, 96 GB, or 128 GB of unified memory can run model sizes that exceed the VRAM of many consumer GPUs.</p>
+            <p>In Apple Silicon systems, memory is not split into â€œRAM for the CPUâ€ and â€œVRAM for the GPU.â€ Instead, one shared pool is available to the system. For AI, this can be a genuine advantage for model loading: a Mac with 64 GB, 96 GB, or 128 GB of unified memory can run model sizes that exceed the VRAM of many consumer GPUs.</p>
             <p>That makes Macs surprisingly attractive for <strong>local inference of quantized large language models</strong>, especially when the user values simplicity, quiet operation, and a single machine for coding plus inference.</p>
           </article>
           <article class="card">
@@ -115,7 +117,7 @@
         <div class="grid two-up">
           <div class="card">
             <h3>1. Excellent local inference workstation</h3>
-            <p>Apple Silicon Macs can be excellent machines for running local assistants, code models, chat models, summarizers, and multimodal tools—particularly via optimized local runtimes and quantized models. For many solo developers and researchers, “fast enough and always available” beats theoretical peak throughput.</p>
+            <p>Apple Silicon Macs can be excellent machines for running local assistants, code models, chat models, summarizers, and multimodal toolsâ€”particularly via optimized local runtimes and quantized models. For many solo developers and researchers, â€œfast enough and always availableâ€ beats theoretical peak throughput.</p>
           </div>
           <div class="card">
             <h3>2. Strong developer ergonomics</h3>
@@ -149,7 +151,7 @@
           </div>
           <div class="card danger">
             <h3>4. Cost can climb quickly</h3>
-            <p>Apple’s higher-memory configurations are powerful but expensive. Once you step into premium RAM tiers, the value case depends heavily on whether you truly benefit from the quiet, integrated, memory-rich experience.</p>
+            <p>Appleâ€™s higher-memory configurations are powerful but expensive. Once you step into premium RAM tiers, the value case depends heavily on whether you truly benefit from the quiet, integrated, memory-rich experience.</p>
           </div>
         </div>
       </section>
@@ -229,7 +231,7 @@
         <div class="grid two-up">
           <div class="card">
             <h3>Macs are best for light experimentation</h3>
-            <p>Parameter-efficient fine-tuning, smaller experiments, notebook-style exploration, and “I want to understand the workflow locally” scenarios can be reasonable on a Mac—particularly if expectations are modest and the stack supports Metal acceleration well.</p>
+            <p>Parameter-efficient fine-tuning, smaller experiments, notebook-style exploration, and â€œI want to understand the workflow locallyâ€ scenarios can be reasonable on a Macâ€”particularly if expectations are modest and the stack supports Metal acceleration well.</p>
           </div>
           <div class="card">
             <h3>Traditional hardware is better for serious training</h3>
@@ -247,7 +249,7 @@
         <div class="grid three-up">
           <div class="card small">
             <h3>Mac</h3>
-            <p>Usually better for battery life, quiet operation, lower heat, cleaner cable footprint, and “just leave it on the desk” usage.</p>
+            <p>Usually better for battery life, quiet operation, lower heat, cleaner cable footprint, and â€œjust leave it on the deskâ€ usage.</p>
           </div>
           <div class="card small">
             <h3>Desktop GPU tower</h3>
@@ -388,8 +390,8 @@
 
       <section>
         <h2>Final Verdict</h2>
-        <p><strong>Macs are no longer “bad for AI.”</strong> They are genuinely strong for a specific slice of AI work: local inference, personal productivity, prototype development, and quiet self-hosting with excellent user experience.</p>
-        <p><strong>Traditional PC/server hardware still defines the mainstream serious AI path.</strong> If your work depends on maximum compatibility, top-end performance, scalable training, or infrastructure growth, the conventional GPU stack—especially NVIDIA—remains the default recommendation.</p>
+        <p><strong>Macs are no longer â€œbad for AI.â€</strong> They are genuinely strong for a specific slice of AI work: local inference, personal productivity, prototype development, and quiet self-hosting with excellent user experience.</p>
+        <p><strong>Traditional PC/server hardware still defines the mainstream serious AI path.</strong> If your work depends on maximum compatibility, top-end performance, scalable training, or infrastructure growth, the conventional GPU stackâ€”especially NVIDIAâ€”remains the default recommendation.</p>
         <p>The smartest decision is not ideological. It is operational: <strong>buy the machine that matches the workload you will actually run most often.</strong></p>
       </section>
     </main>

@@ -1,12 +1,14 @@
-<!doctype html>
+﻿<!doctype html>
     <html lang="en">
     <head>
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <title>Context Windows and KV Cache</title>
       <link rel="stylesheet" href="../assets/styles.css" />
-    </head>
+      <script defer src="/ai-research-site/site-assets/site-search.js"></script>
+</head>
     <body>
+  <div data-site-search></div>
 
 <div class="page layout">
   <aside class="sidebar">
@@ -15,9 +17,10 @@
   </aside>
   <main class="content">
     <section class="hero"><div><span class="eyebrow">Inference memory</span><h1>Context Windows and KV Cache</h1><p class="lead">The context window is the amount of token history the model can condition on in a single request. The KV cache stores intermediate attention information so generation does not repeatedly recompute the full prompt.</p></div><div class="hero-panel"><h3>Practical takeaway</h3><p>Longer context helps only if the right information is present and the system can afford the memory and latency cost.</p></div></section><section class="section"><h2>What the context window includes</h2><p>System instructions, conversation history, user text, retrieved documents, tool outputs, and generated tokens all compete for the same budget. That is why prompt management matters.</p></section><section class="section"><h2>Why the KV cache matters</h2><p>During autoregressive decoding, earlier tokens do not change. Their keys and values can be cached and reused for each new token. This is one of the main reasons streaming generation is practical.</p><div class="grid three"><div class="card"><h3>More prompt tokens</h3><p>Increase prefill cost.</p></div><div class="card"><h3>More retained history</h3><p>Increases KV memory.</p></div><div class="card"><h3>More concurrency</h3><p>Multiplies total serving pressure.</p></div></div><div class="callout">For the deeper hardware and memory tradeoffs, use the existing site pages on <a href="../../ai-research-site/ai-hardware-research-package/index.html">hardware</a> and <a href="../../ai-research-site/quantizing-models-less-vram-package/index.html">quantization</a>.</div></section>
-    <div class="footer"><a href="../inference-pipeline/index.html">Continue → Inference Pipeline</a></div>
+    <div class="footer"><a href="../inference-pipeline/index.html">Continue â†’ Inference Pipeline</a></div>
   </main>
 </div>
 
     </body>
     </html>
+

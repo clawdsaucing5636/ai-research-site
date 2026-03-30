@@ -1,12 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fine-Tuning for a Specific Task</title>
   <link rel="stylesheet" href="styles.css" />
+  <script defer src="/ai-research-site/site-assets/site-search.js"></script>
 </head>
 <body>
+  <div data-site-search></div>
   <div class="layout">
     <aside class="sidebar">
       <div class="brand">
@@ -37,7 +39,7 @@
     <main class="content">
       <header class="hero" id="overview">
         <div class="hero-copy">
-          <span class="pill">Practical • Detailed • Self-contained</span>
+          <span class="pill">Practical â€¢ Detailed â€¢ Self-contained</span>
           <h2>Fine-tuning is not the first tool you should reach for.</h2>
           <p>
             The best fine-tuning projects start with a clear business task, a dataset that reflects real-world usage,
@@ -177,7 +179,7 @@
         <div class="card wide">
           <h3>Dataset strategy by task type</h3>
           <p><strong>Classification:</strong> label balance matters. Ensure rare but important classes are represented.</p>
-          <p><strong>Structured extraction:</strong> include messy inputs, typos, partial information, and explicit “not found” cases.</p>
+          <p><strong>Structured extraction:</strong> include messy inputs, typos, partial information, and explicit â€œnot foundâ€ cases.</p>
           <p><strong>Generation:</strong> high-quality targets matter more than sheer volume. The model learns your output style and decision boundaries from the examples you provide.</p>
           <p><strong>Instruction following:</strong> make prompts diverse while outputs remain policy-consistent.</p>
         </div>
@@ -304,16 +306,16 @@
       <section class="section" id="workflow">
         <h2>End-to-End Training Workflow</h2>
         <ol class="timeline">
-          <li><strong>Define the task</strong> — specify input, output, failure modes, and business success criteria.</li>
-          <li><strong>Baseline with prompting</strong> — test if training is even necessary.</li>
-          <li><strong>Design the dataset</strong> — collect representative examples and create labeling rules.</li>
-          <li><strong>Split the data</strong> — preserve unbiased validation and testing.</li>
-          <li><strong>Choose method</strong> — typically LoRA or QLoRA first.</li>
-          <li><strong>Train a small pilot</strong> — verify pipeline and look for obvious defects.</li>
-          <li><strong>Evaluate thoroughly</strong> — metrics plus manual review on edge cases.</li>
-          <li><strong>Refine data, not just settings</strong> — many failures are dataset problems, not optimizer problems.</li>
-          <li><strong>Select the best checkpoint</strong> — based on validation and practical utility.</li>
-          <li><strong>Deploy carefully</strong> — canary, monitor, compare against baseline.</li>
+          <li><strong>Define the task</strong> â€” specify input, output, failure modes, and business success criteria.</li>
+          <li><strong>Baseline with prompting</strong> â€” test if training is even necessary.</li>
+          <li><strong>Design the dataset</strong> â€” collect representative examples and create labeling rules.</li>
+          <li><strong>Split the data</strong> â€” preserve unbiased validation and testing.</li>
+          <li><strong>Choose method</strong> â€” typically LoRA or QLoRA first.</li>
+          <li><strong>Train a small pilot</strong> â€” verify pipeline and look for obvious defects.</li>
+          <li><strong>Evaluate thoroughly</strong> â€” metrics plus manual review on edge cases.</li>
+          <li><strong>Refine data, not just settings</strong> â€” many failures are dataset problems, not optimizer problems.</li>
+          <li><strong>Select the best checkpoint</strong> â€” based on validation and practical utility.</li>
+          <li><strong>Deploy carefully</strong> â€” canary, monitor, compare against baseline.</li>
         </ol>
       </section>
 
@@ -419,7 +421,7 @@
         <div class="recipe">
           <div class="step"><span>1</span><p>Choose one narrow task, such as support-ticket classification or extracting invoice fields.</p></div>
           <div class="step"><span>2</span><p>Create a prompt-only baseline and collect examples where it fails.</p></div>
-          <div class="step"><span>3</span><p>Prepare 200–2,000 clean, representative examples with a strict labeling guide.</p></div>
+          <div class="step"><span>3</span><p>Prepare 200â€“2,000 clean, representative examples with a strict labeling guide.</p></div>
           <div class="step"><span>4</span><p>Split data into train, validation, and test without leakage.</p></div>
           <div class="step"><span>5</span><p>Start with LoRA or QLoRA on a small instruct model.</p></div>
           <div class="step"><span>6</span><p>Run a small pilot first to confirm formatting, loss behavior, and output quality.</p></div>

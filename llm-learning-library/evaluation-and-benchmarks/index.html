@@ -1,12 +1,14 @@
-<!doctype html>
+﻿<!doctype html>
     <html lang="en">
     <head>
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <title>Evaluation and Benchmarks</title>
       <link rel="stylesheet" href="../assets/styles.css" />
-    </head>
+      <script defer src="/ai-research-site/site-assets/site-search.js"></script>
+</head>
     <body>
+  <div data-site-search></div>
 
 <div class="page layout">
   <aside class="sidebar">
@@ -14,10 +16,11 @@
     <div class="sidebar-card"><h3>Questions to keep in mind</h3><ul><li>How do you know one system is better?</li><li>Why are public benchmarks not enough?</li><li>What should your own eval set measure?</li></ul></div>
   </aside>
   <main class="content">
-    <section class="hero"><div><span class="eyebrow">Measurement</span><h1>Evaluation and Benchmarks</h1><p class="lead">You cannot improve what you do not measure. Public benchmarks help compare models broadly, but product quality depends on your own task-specific evaluation set.</p></div><div class="hero-panel"><h3>Operating principle</h3><p>If you cannot evaluate a change, you cannot safely optimize it.</p></div></section><section class="section"><h2>What to evaluate</h2><div class="grid three"><div class="card"><h3>Task success</h3><p>Did the system solve the user’s actual problem?</p></div><div class="card"><h3>Faithfulness</h3><p>Did it stay grounded in evidence or truth labels?</p></div><div class="card"><h3>Robustness</h3><p>Did it handle ambiguity, noise, and edge cases?</p></div><div class="card"><h3>Cost</h3><p>Was the result economically viable?</p></div><div class="card"><h3>Latency</h3><p>Was it responsive enough for the use case?</p></div><div class="card"><h3>Safety</h3><p>Did policy and failure behavior remain acceptable?</p></div></div></section><section class="section"><h2>Benchmark caution</h2><p>Benchmarks are easy to overread. A model can rank highly on a public leaderboard yet underperform badly on your document corpus, workflow, tool schemas, or domain language.</p><div class="callout">Evaluation turns demo impressions into engineering evidence.</div></section>
-    <div class="footer"><a href="../safety-and-hallucinations/index.html">Continue → Safety and Hallucinations</a></div>
+    <section class="hero"><div><span class="eyebrow">Measurement</span><h1>Evaluation and Benchmarks</h1><p class="lead">You cannot improve what you do not measure. Public benchmarks help compare models broadly, but product quality depends on your own task-specific evaluation set.</p></div><div class="hero-panel"><h3>Operating principle</h3><p>If you cannot evaluate a change, you cannot safely optimize it.</p></div></section><section class="section"><h2>What to evaluate</h2><div class="grid three"><div class="card"><h3>Task success</h3><p>Did the system solve the userâ€™s actual problem?</p></div><div class="card"><h3>Faithfulness</h3><p>Did it stay grounded in evidence or truth labels?</p></div><div class="card"><h3>Robustness</h3><p>Did it handle ambiguity, noise, and edge cases?</p></div><div class="card"><h3>Cost</h3><p>Was the result economically viable?</p></div><div class="card"><h3>Latency</h3><p>Was it responsive enough for the use case?</p></div><div class="card"><h3>Safety</h3><p>Did policy and failure behavior remain acceptable?</p></div></div></section><section class="section"><h2>Benchmark caution</h2><p>Benchmarks are easy to overread. A model can rank highly on a public leaderboard yet underperform badly on your document corpus, workflow, tool schemas, or domain language.</p><div class="callout">Evaluation turns demo impressions into engineering evidence.</div></section>
+    <div class="footer"><a href="../safety-and-hallucinations/index.html">Continue â†’ Safety and Hallucinations</a></div>
   </main>
 </div>
 
     </body>
     </html>
+

@@ -1,12 +1,14 @@
-<!doctype html>
+﻿<!doctype html>
     <html lang="en">
     <head>
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <title>Embeddings and Vector Search</title>
       <link rel="stylesheet" href="../assets/styles.css" />
-    </head>
+      <script defer src="/ai-research-site/site-assets/site-search.js"></script>
+</head>
     <body>
+  <div data-site-search></div>
 
 <div class="page layout">
   <aside class="sidebar">
@@ -15,9 +17,10 @@
   </aside>
   <main class="content">
     <section class="hero"><div><span class="eyebrow">Semantics</span><h1>Embeddings and Vector Search</h1><p class="lead">Embeddings place text in a high-dimensional space where related meanings sit near one another. They are foundational for semantic search, retrieval, clustering, and recommendation.</p></div><div class="hero-panel"><h3>Simple version</h3><p>An embedding is a numerical coordinate that captures useful relationships between pieces of text.</p></div></section><section class="section"><h2>Where embeddings appear</h2><div class="grid two"><div class="card"><h3>Inside an LLM</h3><p>Token IDs are first converted into vectors before the transformer processes them.</p></div><div class="card"><h3>In retrieval systems</h3><p>Separate embedding models map whole chunks or queries to vectors for similarity search.</p></div></div></section><section class="section"><h2>How vector search works</h2><div class="grid three"><div class="card"><h3>Embed the query</h3><p>Turn the question into a vector.</p></div><div class="card"><h3>Compare distances</h3><p>Use cosine similarity or dot product against stored vectors.</p></div><div class="card"><h3>Return neighbors</h3><p>The closest chunks become candidate evidence.</p></div></div><div class="callout">Nearest in vector space is not automatically best. Metadata filters, lexical search, and reranking often improve quality.</div></section>
-    <div class="footer"><a href="../transformers-and-attention/index.html">Continue → Transformers and Attention</a></div>
+    <div class="footer"><a href="../transformers-and-attention/index.html">Continue â†’ Transformers and Attention</a></div>
   </main>
 </div>
 
     </body>
     </html>
+

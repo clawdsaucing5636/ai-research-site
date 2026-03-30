@@ -1,12 +1,14 @@
-<!doctype html>
+﻿<!doctype html>
     <html lang="en">
     <head>
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <title>What an LLM Is</title>
       <link rel="stylesheet" href="../assets/styles.css" />
-    </head>
+      <script defer src="/ai-research-site/site-assets/site-search.js"></script>
+</head>
     <body>
+  <div data-site-search></div>
 
 <div class="page layout">
   <aside class="sidebar">
@@ -20,9 +22,10 @@
 <section class="section"><h2>Why this simple objective becomes powerful</h2><div class="grid three"><div class="card"><h3>Compression of patterns</h3><p>To predict well, the model must absorb grammar, syntax, facts, topic structure, code conventions, and latent relationships between concepts.</p></div><div class="card"><h3>Scale changes behavior</h3><p>Small models memorize shallow patterns. Large models, trained broadly, begin showing abstraction, transfer, and more coherent multi-step outputs.</p></div><div class="card"><h3>Instruction tuning matters</h3><p>The raw model predicts text. Chat behavior usually comes later, through instruction tuning, preference optimization, safety tuning, and system-level scaffolding.</p></div></div></section>
 <section class="section"><h2>Main limits to remember</h2><div class="table-wrap"><table><thead><tr><th>Limit</th><th>Why it happens</th><th>Practical consequence</th></tr></thead><tbody><tr><td>Hallucination</td><td>The model generates plausible text even when evidence is missing.</td><td>You need retrieval, verification, or evaluation loops for factual tasks.</td></tr><tr><td>Context dependence</td><td>The model only sees the prompt window, not the whole world.</td><td>Prompt quality and context management strongly affect performance.</td></tr><tr><td>No durable memory by default</td><td>Each call is usually stateless unless the application stores history.</td><td>Applications must explicitly manage memory, documents, and user state.</td></tr><tr><td>Training cutoffs and bias</td><td>Knowledge reflects its training distribution and later tuning choices.</td><td>Fresh data and domain grounding often require RAG or fine-tuning.</td></tr></tbody></table></div><div class="callout">Next step: learn how text is broken into <strong>tokens</strong>. Tokens are the unit the model actually sees and predicts, so they shape cost, context length, and model behavior.</div></section>
 
-    <div class="footer"><a href="../tokens-and-tokenization/index.html">Continue to Lesson 2 → Tokens and Tokenization</a></div>
+    <div class="footer"><a href="../tokens-and-tokenization/index.html">Continue to Lesson 2 â†’ Tokens and Tokenization</a></div>
   </main>
 </div>
 
     </body>
     </html>
+
