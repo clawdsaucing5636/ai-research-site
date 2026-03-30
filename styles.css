@@ -1,0 +1,14 @@
+@import url('./site-assets/research-shared.css');
+
+.hero {
+  padding: 32px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(300px, .95fr);
+  gap: 24px;
+  align-items: start;
+}
+.hero-panel ul { margin: 12px 0 0 18px; padding: 0; }
+.topic-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px; margin-top:22px; }
+.link-card { text-decoration:none; }
+.section-intro { max-width: 72ch; }
+@media (max-width: 900px) { .hero { grid-template-columns: 1fr; } }

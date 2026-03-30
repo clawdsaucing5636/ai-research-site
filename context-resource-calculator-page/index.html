@@ -1,9 +1,9 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Context Resource Calculator â€” How many tokens fit in memory?</title>
+  <title>Context Resource Calculator — How many tokens fit in memory?</title>
   <meta name="description" content="Offline guide and calculator for estimating RAM/VRAM needs for LLM context length, KV cache, model weights, quantization, and concurrency." />
   <link rel="stylesheet" href="styles.css" />
   <script defer src="/ai-research-site/site-assets/site-search.js"></script>
@@ -15,7 +15,7 @@
       <div class="hero-copy">
         <span class="eyebrow">Offline learning page</span>
         <h1>Context Resource Calculator</h1>
-        <p class="lead">A practical guide to estimating how much <strong>VRAM</strong> or <strong>RAM</strong> you need for a language modelâ€™s <strong>weights</strong> and its <strong>context window</strong>. If you have ever asked â€œhow many tokens can I fit?â€ this page gives you the intuition, the rough formulas, and an interactive calculator.</p>
+        <p class="lead">A practical guide to estimating how much <strong>VRAM</strong> or <strong>RAM</strong> you need for a language model’s <strong>weights</strong> and its <strong>context window</strong>. If you have ever asked “how many tokens can I fit?” this page gives you the intuition, the rough formulas, and an interactive calculator.</p>
         <div class="pill-row">
           <span class="pill">Model size vs context size</span>
           <span class="pill">KV cache explained</span>
@@ -25,7 +25,7 @@
         <div class="hero-actions">
           <a class="button primary" href="#calculator">Open calculator</a>
           <a class="button" href="#examples">See worked examples</a>
-          <a class="button" href="../ai-research-site/llm-learning-library/context-windows-and-long-context/index.html">Related context lesson</a>
+          <a class="button" href="../llm-learning-library/context-windows-and-kv-cache/index.html">Related context lesson</a>
         </div>
       </div>
       <aside class="hero-panel">
@@ -33,9 +33,9 @@
         <p><strong>Weights</strong> are the model itself. <strong>KV cache</strong> is memory the model builds while reading tokens. A model can fit in memory but still run out of room when you increase context length, batch size, or concurrent users.</p>
         <div class="mini-metric-grid">
           <div class="metric-card"><span class="metric-label">Weights scale with</span><strong>Parameter count</strong></div>
-          <div class="metric-card"><span class="metric-label">KV cache scales with</span><strong>Tokens Ã— layers Ã— heads</strong></div>
+          <div class="metric-card"><span class="metric-label">KV cache scales with</span><strong>Tokens × layers × heads</strong></div>
           <div class="metric-card"><span class="metric-label">Latency impact</span><strong>Longer prompts often slow generation</strong></div>
-          <div class="metric-card"><span class="metric-label">Beginner trap</span><strong>Context is not â€œfreeâ€ once weights fit</strong></div>
+          <div class="metric-card"><span class="metric-label">Beginner trap</span><strong>Context is not “free” once weights fit</strong></div>
         </div>
       </aside>
     </header>
@@ -49,9 +49,9 @@
         <div class="grid two">
           <article class="card">
             <h3>1. The model loads its weights</h3>
-            <p>Before the model can answer anything, its learned parameters must be in memory. Think of weights as the modelâ€™s permanent knowledge machinery. Their size depends mostly on <strong>how many parameters</strong> the model has and <strong>how many bits</strong> each parameter uses after quantization.</p>
+            <p>Before the model can answer anything, its learned parameters must be in memory. Think of weights as the model’s permanent knowledge machinery. Their size depends mostly on <strong>how many parameters</strong> the model has and <strong>how many bits</strong> each parameter uses after quantization.</p>
             <p>Very roughly:</p>
-            <p class="formula">Weight memory â‰ˆ parameter count Ã— bytes per weight</p>
+            <p class="formula">Weight memory ≈ parameter count × bytes per weight</p>
             <p>A 7B model at 16-bit precision needs far more memory for weights than the same 7B model at 4-bit quantization.</p>
           </article>
           <article class="card">
@@ -126,21 +126,21 @@
           <article class="wide-card">
             <h3>Rough decoder-only formula</h3>
             <p>For an estimate, a convenient formula is:</p>
-            <p class="formula block">KV cache bytes â‰ˆ tokens Ã— layers Ã— KV heads Ã— head dimension Ã— 2 Ã— bytes per KV element Ã— batch Ã— concurrent sequences</p>
+            <p class="formula block">KV cache bytes ≈ tokens × layers × KV heads × head dimension × 2 × bytes per KV element × batch × concurrent sequences</p>
             <ul>
               <li><strong>tokens</strong>: prompt tokens kept in context, plus generated tokens if they remain in cache</li>
               <li><strong>layers</strong>: transformer block count</li>
-              <li><strong>KV heads Ã— head dimension</strong>: how wide each layerâ€™s remembered state is</li>
+              <li><strong>KV heads × head dimension</strong>: how wide each layer’s remembered state is</li>
               <li><strong>2</strong>: one tensor for keys and one for values</li>
               <li><strong>bytes per KV element</strong>: often 2 bytes for fp16/bf16, but some runtimes use 1 byte or other schemes</li>
             </ul>
           </article>
           <article class="wide-card">
             <h3>Simplified intuition formula</h3>
-            <p>When a model uses standard multi-head attention, <span class="codeish">KV heads Ã— head dimension</span> is often close to the model hidden size. With grouped-query attention, it is smaller by a ratio.</p>
-            <p class="formula block">KV cache bytes â‰ˆ tokens Ã— layers Ã— hidden size Ã— 2 Ã— bytes per KV element Ã— GQA factor Ã— batch Ã— concurrency</p>
+            <p>When a model uses standard multi-head attention, <span class="codeish">KV heads × head dimension</span> is often close to the model hidden size. With grouped-query attention, it is smaller by a ratio.</p>
+            <p class="formula block">KV cache bytes ≈ tokens × layers × hidden size × 2 × bytes per KV element × GQA factor × batch × concurrency</p>
             <p>Where <strong>GQA factor</strong> is roughly:</p>
-            <p class="formula">KV heads Ã· attention heads</p>
+            <p class="formula">KV heads ÷ attention heads</p>
             <p>If a model has 8 KV heads and 32 attention heads, the factor is <span class="codeish">0.25</span>. That can reduce KV memory a lot versus older full multi-head designs.</p>
           </article>
         </div>
@@ -226,7 +226,7 @@
             <article class="card result-card">
               <span class="result-label">Estimated weight memory</span>
               <strong id="weightOut">0 GB</strong>
-              <p>Parameter count Ã— selected weight precision, plus no extra optimizer state.</p>
+              <p>Parameter count × selected weight precision, plus no extra optimizer state.</p>
             </article>
             <article class="card result-card">
               <span class="result-label">Estimated KV cache</span>
@@ -240,7 +240,7 @@
             </article>
             <article class="card result-card accent-card">
               <span class="result-label">Fits in your budget?</span>
-              <strong id="fitOut">â€”</strong>
+              <strong id="fitOut">—</strong>
               <p id="fitDetail">Adjust the controls to compare setups.</p>
             </article>
           </div>
@@ -315,8 +315,8 @@
                 <td>Real memory is often a bit above the ideal number</td>
               </tr>
               <tr>
-                <td>2â€“3 bit</td>
-                <td>0.25â€“0.375</td>
+                <td>2–3 bit</td>
+                <td>0.25–0.375</td>
                 <td>Maximum compression experiments</td>
                 <td>Compatibility and quality can become limiting factors</td>
               </tr>
@@ -356,7 +356,7 @@
             <div class="stepnum">4</div>
             <div>
               <h3>Sliding window, chunked attention, and prefix reuse</h3>
-              <p>Certain architectures or serving systems avoid keeping every token equally â€œlive.â€ These optimizations can reduce practical memory growth, but they do not erase the underlying need to account for token history.</p>
+              <p>Certain architectures or serving systems avoid keeping every token equally “live.” These optimizations can reduce practical memory growth, but they do not erase the underlying need to account for token history.</p>
             </div>
           </article>
         </div>
@@ -389,9 +389,9 @@
           <article class="card example-card">
             <h3>Example A: 7B model, 4-bit, 8k context</h3>
             <ul>
-              <li>Weights: about <strong>3.5 GB idealized</strong>, often more like 4â€“5+ GB in practice with metadata and runtime overhead</li>
+              <li>Weights: about <strong>3.5 GB idealized</strong>, often more like 4–5+ GB in practice with metadata and runtime overhead</li>
               <li>KV cache: depends heavily on architecture; a modern GQA design might land in the low single-digit GB range at 8k</li>
-              <li>Takeaway: feasible on a 12â€“24 GB GPU, but concurrency can eat headroom fast</li>
+              <li>Takeaway: feasible on a 12–24 GB GPU, but concurrency can eat headroom fast</li>
             </ul>
           </article>
           <article class="card example-card">
@@ -399,7 +399,7 @@
             <ul>
               <li>Weights: roughly <strong>6.5 GB idealized</strong> before overhead</li>
               <li>KV cache: long context now becomes a major budget item, often rivaling or exceeding weights depending on KV precision and GQA ratio</li>
-              <li>Takeaway: long context can turn a â€œfits comfortablyâ€ model into a tight memory problem</li>
+              <li>Takeaway: long context can turn a “fits comfortably” model into a tight memory problem</li>
             </ul>
           </article>
           <article class="card example-card">
@@ -413,7 +413,7 @@
           <article class="card example-card">
             <h3>Example D: same model, more users</h3>
             <ul>
-              <li>One 7B modelâ€™s weights may stay fixed around a few GB</li>
+              <li>One 7B model’s weights may stay fixed around a few GB</li>
               <li>But ten simultaneous 8k sessions can multiply the cache cost by around ten</li>
               <li>Takeaway: serving systems often become cache-limited before they become weight-limited</li>
             </ul>
@@ -431,7 +431,7 @@
             <div class="stepnum">1</div>
             <div>
               <h3>Estimate weight memory first</h3>
-              <p>Parameters Ã— bytes per parameter gives your first rough number. Then add real-world overhead because quantized formats are never perfectly ideal.</p>
+              <p>Parameters × bytes per parameter gives your first rough number. Then add real-world overhead because quantized formats are never perfectly ideal.</p>
             </div>
           </article>
           <article class="roadmap-step">
@@ -465,7 +465,7 @@
         </div>
         <div class="grid three">
           <article class="card">
-            <h3>Bigger model â‰  longer context</h3>
+            <h3>Bigger model ≠ longer context</h3>
             <p>Model size mostly determines weight memory. Context length mostly determines KV cache. You need room for both.</p>
           </article>
           <article class="card">
@@ -478,7 +478,7 @@
           </article>
         </div>
         <div class="footer-note">
-          <p>Related reading: <a href="../ai-research-site/llm-learning-library/tokens-and-tokenization/index.html">Tokens and Tokenization</a> Â· <a href="../ai-research-site/llm-learning-library/serving-and-inference/index.html">Serving and Inference</a> Â· <a href="../ai-research-site/quantizing-models-less-vram-package/index.html">Quantizing Models to Use Less VRAM</a></p>
+          <p>Related reading: <a href="../llm-learning-library/tokens-and-tokenization/index.html">Tokens and Tokenization</a> · <a href="../llm-learning-library/serving-and-deployment-basics/index.html">Serving and Inference</a> · <a href="../quantizing-models-less-vram-package/index.html">Quantizing Models to Use Less VRAM</a></p>
         </div>
       </section>
     </main>
@@ -486,4 +486,5 @@
 
   <script src="script.js"></script>
 </body>
+</html>
 </html>
