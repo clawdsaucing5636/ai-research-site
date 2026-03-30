@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Context Resource Calculator — How many tokens fit in memory?</title>
+  <meta name="description" content="Offline guide and calculator for estimating RAM/VRAM needs for LLM context length, KV cache, model weights, quantization, and concurrency." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">Offline learning page</span>
+        <h1>Context Resource Calculator</h1>
+        <p class="lead">A practical guide to estimating how much <strong>VRAM</strong> or <strong>RAM</strong> you need for a language model’s <strong>weights</strong> and its <strong>context window</strong>. If you have ever asked “how many tokens can I fit?” this page gives you the intuition, the rough formulas, and an interactive calculator.</p>
+        <div class="pill-row">
+          <span class="pill">Model size vs context size</span>
+          <span class="pill">KV cache explained</span>
+          <span class="pill">Quantization tradeoffs</span>
+          <span class="pill">Batching and concurrency</span>
+        </div>
+        <div class="hero-actions">
+          <a class="button primary" href="#calculator">Open calculator</a>
+          <a class="button" href="#examples">See worked examples</a>
+          <a class="button" href="../ai-research-site/llm-learning-library/context-windows-and-long-context/index.html">Related context lesson</a>
+        </div>
+      </div>
+      <aside class="hero-panel">
+        <h2>Core idea</h2>
+        <p><strong>Weights</strong> are the model itself. <strong>KV cache</strong> is memory the model builds while reading tokens. A model can fit in memory but still run out of room when you increase context length, batch size, or concurrent users.</p>
+        <div class="mini-metric-grid">
+          <div class="metric-card"><span class="metric-label">Weights scale with</span><strong>Parameter count</strong></div>
+          <div class="metric-card"><span class="metric-label">KV cache scales with</span><strong>Tokens × layers × heads</strong></div>
+          <div class="metric-card"><span class="metric-label">Latency impact</span><strong>Longer prompts often slow generation</strong></div>
+          <div class="metric-card"><span class="metric-label">Beginner trap</span><strong>Context is not “free” once weights fit</strong></div>
+        </div>
+      </aside>
+    </header>
+
+    <main>
+      <section class="section" id="mental-model">
+        <div class="section-head">
+          <span class="kicker">Mental model</span>
+          <h2>Why tokens consume memory</h2>
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <h3>1. The model loads its weights</h3>
+            <p>Before the model can answer anything, its learned parameters must be in memory. Think of weights as the model’s permanent knowledge machinery. Their size depends mostly on <strong>how many parameters</strong> the model has and <strong>how many bits</strong> each parameter uses after quantization.</p>
+            <p>Very roughly:</p>
+            <p class="formula">Weight memory ≈ parameter count × bytes per weight</p>
+            <p>A 7B model at 16-bit precision needs far more memory for weights than the same 7B model at 4-bit quantization.</p>
+          </article>
+          <article class="card">
+            <h3>2. Every processed token leaves a trail</h3>
+            <p>As a decoder-only LLM reads your prompt, each layer stores <strong>keys</strong> and <strong>values</strong> so the model can attend back to earlier tokens. That stored history is the <strong>KV cache</strong>. The longer the context, the bigger the cache.</p>
+            <p class="formula">KV cache grows roughly linearly with token count</p>
+            <p>That is why doubling context from 8k to 16k can nearly double KV memory, even though the model weights stay the same.</p>
+          </article>
+        </div>
+        <div class="callout">A useful habit: always separate <strong>static memory</strong> (weights) from <strong>dynamic memory</strong> (KV cache, activations, runtime overhead, batch buffers, and output buffers).</div>
+      </section>
+
+      <section class="section" id="weights-vs-cache">
+        <div class="section-head">
+          <span class="kicker">Two different budgets</span>
+          <h2>Why weights and KV cache are separate costs</h2>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Cost bucket</th>
+                <th>What it represents</th>
+                <th>What makes it larger</th>
+                <th>What helps reduce it</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Weights</strong></td>
+                <td>The trained model parameters loaded before inference starts</td>
+                <td>Bigger model, higher precision, duplicate copies across GPUs</td>
+                <td>Smaller model, lower-bit quantization, sharding/offload</td>
+              </tr>
+              <tr>
+                <td><strong>KV cache</strong></td>
+                <td>Stored keys and values for each prior token at each layer</td>
+                <td>Longer context, more users, larger batch size, less efficient attention layouts</td>
+                <td>Shorter prompts, smaller max context, cache quantization, better architectures, request limits</td>
+              </tr>
+              <tr>
+                <td><strong>Runtime overhead</strong></td>
+                <td>Allocator overhead, framework buffers, kernels, temp tensors, fragmentation</td>
+                <td>Less optimized runtime, large batch sizes, many parallel requests</td>
+                <td>Optimized runtime, headroom, careful tuning</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="kv-cache">
+        <div class="section-head">
+          <span class="kicker">The main variable cost</span>
+          <h2>How to think about KV cache</h2>
+        </div>
+        <div class="grid three">
+          <article class="card">
+            <h3>What is stored?</h3>
+            <p>For each token, each layer stores a <strong>key</strong> tensor and a <strong>value</strong> tensor. That gives the model a memory of earlier tokens when generating later ones.</p>
+          </article>
+          <article class="card">
+            <h3>Why two tensors?</h3>
+            <p>Attention compares the current query against stored keys, then uses the corresponding values to assemble the context-aware representation. So the cache keeps both K and V.</p>
+          </article>
+          <article class="card">
+            <h3>Why linearly with tokens?</h3>
+            <p>Every additional token creates another slice of cache at every layer. One token is cheap. Tens of thousands of tokens add up fast.</p>
+          </article>
+        </div>
+        <div class="grid two top-gap">
+          <article class="wide-card">
+            <h3>Rough decoder-only formula</h3>
+            <p>For an estimate, a convenient formula is:</p>
+            <p class="formula block">KV cache bytes ≈ tokens × layers × KV heads × head dimension × 2 × bytes per KV element × batch × concurrent sequences</p>
+            <ul>
+              <li><strong>tokens</strong>: prompt tokens kept in context, plus generated tokens if they remain in cache</li>
+              <li><strong>layers</strong>: transformer block count</li>
+              <li><strong>KV heads × head dimension</strong>: how wide each layer’s remembered state is</li>
+              <li><strong>2</strong>: one tensor for keys and one for values</li>
+              <li><strong>bytes per KV element</strong>: often 2 bytes for fp16/bf16, but some runtimes use 1 byte or other schemes</li>
+            </ul>
+          </article>
+          <article class="wide-card">
+            <h3>Simplified intuition formula</h3>
+            <p>When a model uses standard multi-head attention, <span class="codeish">KV heads × head dimension</span> is often close to the model hidden size. With grouped-query attention, it is smaller by a ratio.</p>
+            <p class="formula block">KV cache bytes ≈ tokens × layers × hidden size × 2 × bytes per KV element × GQA factor × batch × concurrency</p>
+            <p>Where <strong>GQA factor</strong> is roughly:</p>
+            <p class="formula">KV heads ÷ attention heads</p>
+            <p>If a model has 8 KV heads and 32 attention heads, the factor is <span class="codeish">0.25</span>. That can reduce KV memory a lot versus older full multi-head designs.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="calculator">
+        <div class="section-head">
+          <span class="kicker">Interactive estimate</span>
+          <h2>Context resource calculator</h2>
+          <p class="muted">This calculator is intentionally approximate. It is designed to build intuition, not replace vendor documentation or runtime profiling.</p>
+        </div>
+        <div class="calculator">
+          <div class="card form-card">
+            <div class="form-grid">
+              <label>
+                <span>Parameters (billions)</span>
+                <input id="paramsB" type="number" min="0.1" step="0.1" value="7" />
+              </label>
+              <label>
+                <span>Weight precision</span>
+                <select id="weightBits">
+                  <option value="16">16-bit (fp16/bf16)</option>
+                  <option value="8">8-bit</option>
+                  <option value="6">6-bit</option>
+                  <option value="5">5-bit</option>
+                  <option value="4" selected>4-bit</option>
+                  <option value="3">3-bit</option>
+                  <option value="2">2-bit</option>
+                </select>
+              </label>
+              <label>
+                <span>Layers</span>
+                <input id="layers" type="number" min="1" step="1" value="32" />
+              </label>
+              <label>
+                <span>Hidden size</span>
+                <input id="hidden" type="number" min="64" step="64" value="4096" />
+              </label>
+              <label>
+                <span>Attention heads</span>
+                <input id="attnHeads" type="number" min="1" step="1" value="32" />
+              </label>
+              <label>
+                <span>KV heads</span>
+                <input id="kvHeads" type="number" min="1" step="1" value="8" />
+              </label>
+              <label>
+                <span>Context tokens per sequence</span>
+                <input id="tokens" type="number" min="1" step="256" value="8192" />
+              </label>
+              <label>
+                <span>Batch size</span>
+                <input id="batch" type="number" min="1" step="1" value="1" />
+              </label>
+              <label>
+                <span>Concurrent sequences / users</span>
+                <input id="concurrency" type="number" min="1" step="1" value="1" />
+              </label>
+              <label>
+                <span>KV cache precision</span>
+                <select id="kvBytes">
+                  <option value="2" selected>2 bytes (fp16/bf16)</option>
+                  <option value="1">1 byte (quantized/int8-like)</option>
+                  <option value="0.5">0.5 byte (aggressive KV quantization)</option>
+                </select>
+              </label>
+              <label>
+                <span>Runtime overhead margin</span>
+                <select id="overheadPct">
+                  <option value="0.1">10%</option>
+                  <option value="0.15" selected>15%</option>
+                  <option value="0.25">25%</option>
+                  <option value="0.35">35%</option>
+                </select>
+              </label>
+              <label>
+                <span>Estimated GPU/host memory budget (GB)</span>
+                <input id="budget" type="number" min="1" step="1" value="24" />
+              </label>
+            </div>
+          </div>
+          <div class="results-grid">
+            <article class="card result-card">
+              <span class="result-label">Estimated weight memory</span>
+              <strong id="weightOut">0 GB</strong>
+              <p>Parameter count × selected weight precision, plus no extra optimizer state.</p>
+            </article>
+            <article class="card result-card">
+              <span class="result-label">Estimated KV cache</span>
+              <strong id="kvOut">0 GB</strong>
+              <p>For the chosen context, layers, GQA ratio, batch size, and concurrency.</p>
+            </article>
+            <article class="card result-card">
+              <span class="result-label">Subtotal + overhead</span>
+              <strong id="totalOut">0 GB</strong>
+              <p>Weights + KV cache + runtime headroom.</p>
+            </article>
+            <article class="card result-card accent-card">
+              <span class="result-label">Fits in your budget?</span>
+              <strong id="fitOut">—</strong>
+              <p id="fitDetail">Adjust the controls to compare setups.</p>
+            </article>
+          </div>
+          <div class="grid two top-gap">
+            <article class="wide-card">
+              <h3>What this estimate includes</h3>
+              <ul>
+                <li>Model weights at your selected bit width</li>
+                <li>KV cache for the current active context</li>
+                <li>A configurable safety margin for runtime overhead and fragmentation</li>
+              </ul>
+            </article>
+            <article class="wide-card">
+              <h3>What it does <em>not</em> fully include</h3>
+              <ul>
+                <li>MoE expert activation details</li>
+                <li>Prefill vs decode throughput differences</li>
+                <li>Activation memory during training or fine-tuning</li>
+                <li>Exact runtime implementation quirks in vLLM, llama.cpp, TensorRT-LLM, ExLlama, MLX, or custom stacks</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="quantization">
+        <div class="section-head">
+          <span class="kicker">Compression</span>
+          <h2>What changes with quantization level</h2>
+        </div>
+        <div class="grid three">
+          <article class="card">
+            <h3>Weights shrink directly</h3>
+            <p>Moving from 16-bit to 4-bit can reduce weight memory to roughly one quarter, although real files and runtimes add metadata and alignment overhead.</p>
+          </article>
+          <article class="card">
+            <h3>KV cache may or may not shrink</h3>
+            <p>Some runtimes still keep KV cache in fp16/bf16 even if weights are 4-bit. Others support int8 or more aggressive KV cache quantization. So weight quantization does <strong>not automatically</strong> mean cheap long context.</p>
+          </article>
+          <article class="card">
+            <h3>Quality and speed can move too</h3>
+            <p>Lower-bit formats can trade some quality for memory savings and may change kernel efficiency. Different runtimes handle the tradeoff differently.</p>
+          </article>
+        </div>
+        <div class="table-wrap top-gap">
+          <table>
+            <thead>
+              <tr>
+                <th>Format</th>
+                <th>Typical weight bytes / parameter</th>
+                <th>Main use</th>
+                <th>Important caveat</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>16-bit</td>
+                <td>2.0</td>
+                <td>Higher fidelity, simpler support</td>
+                <td>Heavy for consumer GPUs</td>
+              </tr>
+              <tr>
+                <td>8-bit</td>
+                <td>1.0</td>
+                <td>Moderate compression</td>
+                <td>Still large for very long context</td>
+              </tr>
+              <tr>
+                <td>4-bit</td>
+                <td>0.5</td>
+                <td>Popular local inference compromise</td>
+                <td>Real memory is often a bit above the ideal number</td>
+              </tr>
+              <tr>
+                <td>2–3 bit</td>
+                <td>0.25–0.375</td>
+                <td>Maximum compression experiments</td>
+                <td>Compatibility and quality can become limiting factors</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="runtime-differences">
+        <div class="section-head">
+          <span class="kicker">Implementation matters</span>
+          <h2>What changes by architecture and runtime</h2>
+        </div>
+        <div class="roadmap">
+          <article class="roadmap-step">
+            <div class="stepnum">1</div>
+            <div>
+              <h3>Attention design</h3>
+              <p>Models using <strong>grouped-query attention (GQA)</strong> or <strong>multi-query attention (MQA)</strong> store fewer KV heads than classic multi-head attention. That lowers KV memory per token.</p>
+            </div>
+          </article>
+          <article class="roadmap-step">
+            <div class="stepnum">2</div>
+            <div>
+              <h3>Runtime memory planning</h3>
+              <p>Frameworks differ in allocator behavior, page/block management, cache compaction, prefix caching, and how they reserve temporary buffers. The same model can fit in one runtime and fail in another.</p>
+            </div>
+          </article>
+          <article class="roadmap-step">
+            <div class="stepnum">3</div>
+            <div>
+              <h3>Host RAM vs GPU VRAM</h3>
+              <p>Some stacks offload layers or cache to system RAM. That can make a model runnable, but often at a big speed cost because RAM bandwidth is far below GPU VRAM bandwidth.</p>
+            </div>
+          </article>
+          <article class="roadmap-step">
+            <div class="stepnum">4</div>
+            <div>
+              <h3>Sliding window, chunked attention, and prefix reuse</h3>
+              <p>Certain architectures or serving systems avoid keeping every token equally “live.” These optimizations can reduce practical memory growth, but they do not erase the underlying need to account for token history.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="batching">
+        <div class="section-head">
+          <span class="kicker">Serving economics</span>
+          <h2>Batch size and concurrent users</h2>
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <h3>Batch size</h3>
+            <p>If you process several sequences together, you often get better throughput, but memory usage rises because the runtime must hold more token states at once. In rough planning, batch size scales KV memory close to linearly.</p>
+          </article>
+          <article class="card">
+            <h3>Concurrent users</h3>
+            <p>In a server, each active conversation may carry its own cache. Ten users with 8k-token conversations can be much more memory-hungry than one user at 8k, even if they share the same model weights.</p>
+          </article>
+        </div>
+        <div class="callout">Rule of thumb: <strong>weights are shared</strong>, but <strong>KV cache is usually per active sequence</strong>. That is why serving many users stresses memory differently from running one long chat locally.</div>
+      </section>
+
+      <section class="section" id="examples">
+        <div class="section-head">
+          <span class="kicker">Worked examples</span>
+          <h2>Practical examples for different model sizes</h2>
+        </div>
+        <div class="examples-grid">
+          <article class="card example-card">
+            <h3>Example A: 7B model, 4-bit, 8k context</h3>
+            <ul>
+              <li>Weights: about <strong>3.5 GB idealized</strong>, often more like 4–5+ GB in practice with metadata and runtime overhead</li>
+              <li>KV cache: depends heavily on architecture; a modern GQA design might land in the low single-digit GB range at 8k</li>
+              <li>Takeaway: feasible on a 12–24 GB GPU, but concurrency can eat headroom fast</li>
+            </ul>
+          </article>
+          <article class="card example-card">
+            <h3>Example B: 13B model, 4-bit, 32k context</h3>
+            <ul>
+              <li>Weights: roughly <strong>6.5 GB idealized</strong> before overhead</li>
+              <li>KV cache: long context now becomes a major budget item, often rivaling or exceeding weights depending on KV precision and GQA ratio</li>
+              <li>Takeaway: long context can turn a “fits comfortably” model into a tight memory problem</li>
+            </ul>
+          </article>
+          <article class="card example-card">
+            <h3>Example C: 70B model, 4-bit, 8k context</h3>
+            <ul>
+              <li>Weights: around <strong>35 GB idealized</strong> before runtime overhead</li>
+              <li>KV cache: still meaningful, but weights dominate first</li>
+              <li>Takeaway: huge models are usually weight-limited on single GPUs even before context becomes the bottleneck</li>
+            </ul>
+          </article>
+          <article class="card example-card">
+            <h3>Example D: same model, more users</h3>
+            <ul>
+              <li>One 7B model’s weights may stay fixed around a few GB</li>
+              <li>But ten simultaneous 8k sessions can multiply the cache cost by around ten</li>
+              <li>Takeaway: serving systems often become cache-limited before they become weight-limited</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="workflow">
+        <div class="section-head">
+          <span class="kicker">Planning method</span>
+          <h2>A beginner-friendly way to estimate resources</h2>
+        </div>
+        <div class="roadmap">
+          <article class="roadmap-step">
+            <div class="stepnum">1</div>
+            <div>
+              <h3>Estimate weight memory first</h3>
+              <p>Parameters × bytes per parameter gives your first rough number. Then add real-world overhead because quantized formats are never perfectly ideal.</p>
+            </div>
+          </article>
+          <article class="roadmap-step">
+            <div class="stepnum">2</div>
+            <div>
+              <h3>Estimate KV cache for your target context</h3>
+              <p>Use layers, hidden size or head dimensions, GQA ratio, batch size, and concurrency. This tells you whether long context is viable.</p>
+            </div>
+          </article>
+          <article class="roadmap-step">
+            <div class="stepnum">3</div>
+            <div>
+              <h3>Add runtime headroom</h3>
+              <p>Do not plan to use 100% of VRAM. Memory fragmentation, temporary buffers, and system needs mean you usually want safety margin.</p>
+            </div>
+          </article>
+          <article class="roadmap-step">
+            <div class="stepnum">4</div>
+            <div>
+              <h3>Test with realistic prompts</h3>
+              <p>A benchmark using a tiny prompt can mislead you. Test prefills, long prompts, and concurrent traffic that resembles your actual use case.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="takeaways">
+        <div class="section-head">
+          <span class="kicker">Summary</span>
+          <h2>The intuition to remember</h2>
+        </div>
+        <div class="grid three">
+          <article class="card">
+            <h3>Bigger model ≠ longer context</h3>
+            <p>Model size mostly determines weight memory. Context length mostly determines KV cache. You need room for both.</p>
+          </article>
+          <article class="card">
+            <h3>Quantization helps, but not everywhere</h3>
+            <p>4-bit weights are great for shrinking the model, but the KV cache may still remain at 16-bit unless your runtime supports KV quantization.</p>
+          </article>
+          <article class="card">
+            <h3>Serving multiplies cache</h3>
+            <p>More users or larger batches can multiply dynamic memory even while the weight memory stays fixed.</p>
+          </article>
+        </div>
+        <div class="footer-note">
+          <p>Related reading: <a href="../ai-research-site/llm-learning-library/tokens-and-tokenization/index.html">Tokens and Tokenization</a> · <a href="../ai-research-site/llm-learning-library/serving-and-inference/index.html">Serving and Inference</a> · <a href="../ai-research-site/quantizing-models-less-vram-package/index.html">Quantizing Models to Use Less VRAM</a></p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
