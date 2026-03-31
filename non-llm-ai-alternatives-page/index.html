@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Beyond LLMs: Non-LLM Systems That Often Win</title>
+  <meta name="description" content="A practical field guide to non-LLM AI systems: where classical ML, recommender systems, computer vision, speech, forecasting, graph ML, planning, optimization, and hybrid systems outperform or complement LLMs." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <div>
+        <span class="eyebrow">AI systems field guide</span>
+        <h1>AI Beyond LLMs</h1>
+        <p class="lead">Large language models are powerful, but they are not the default best answer for every AI problem. In many production settings, <strong>smaller, narrower, structured systems</strong> are cheaper, faster, easier to verify, and more accurate. This page maps the serious non-LLM approaches that still matter most in practice, explains where they beat LLM-centric stacks, and shows what hardware profiles fit each category.</p>
+        <div class="pill-row">
+          <span class="pill">Research-paper-informed</span>
+          <span class="pill">Hosting-first</span>
+          <span class="pill">Dark themed</span>
+          <span class="pill">Built for practitioners</span>
+        </div>
+        <div class="hero-actions">
+          <a class="button primary" href="#landscape">See the landscape</a>
+          <a class="button" href="#hardware">Jump to hardware guidance</a>
+          <a class="button" href="../ai-research-site/index.html">Back to AI research site</a>
+        </div>
+      </div>
+      <aside class="hero-panel">
+        <h2>Executive takeaway</h2>
+        <ul>
+          <li><strong>Use classical ML</strong> for tabular prediction, ranking, credit, churn, fraud baselines, and interpretable scoring.</li>
+          <li><strong>Use recommenders and retrieval</strong> when ranking quality and latency matter more than fluent prose.</li>
+          <li><strong>Use domain models</strong> for vision, speech, forecasting, planning, and control when the input structure is known.</li>
+          <li><strong>Use LLMs as an interface layer</strong>, not necessarily as the whole intelligence stack.</li>
+        </ul>
+        <div class="callout">A practical pattern keeps recurring: <strong>structured data + clear objective + measurable output</strong> usually favors non-LLM systems or hybrid pipelines over pure generative prompting.</div>
+      </aside>
+    </header>
+
+    <section class="section" id="landscape">
+      <div class="section-head">
+        <span class="kicker">Landscape</span>
+        <h2>Where non-LLM AI still clearly wins</h2>
+        <p class="section-intro">The categories below are not nostalgic leftovers. They are the backbone of search, ads, industrial vision, forecasting, routing, robotics, speech pipelines, fraud systems, and most high-volume recommendation infrastructure.</p>
+      </div>
+      <div class="topic-grid">
+        <article class="card link-card">
+          <span class="tag">Tabular ML</span>
+          <h3>Classical supervised learning</h3>
+          <p>Gradient boosting, random forests, linear models, and calibrated classifiers often beat LLMs on structured business data with far less compute.</p>
+        </article>
+        <article class="card link-card">
+          <span class="tag">Ranking</span>
+          <h3>Recommendation systems</h3>
+          <p>Collaborative filtering, matrix factorization, DLRM-style models, and graph recommenders dominate high-throughput personalization.</p>
+        </article>
+        <article class="card link-card">
+          <span class="tag">Perception</span>
+          <h3>Computer vision pipelines</h3>
+          <p>CNNs, detectors, segmenters, tracking, OCR, and inspection stacks stay superior for image throughput, edge deployment, and deterministic workflows.</p>
+        </article>
+        <article class="card link-card">
+          <span class="tag">Audio</span>
+          <h3>Speech and acoustic models</h3>
+          <p>ASR, speaker ID, keyword spotting, VAD, and diarization solve real audio problems more efficiently than text-first models.</p>
+        </article>
+        <article class="card link-card">
+          <span class="tag">Prediction</span>
+          <h3>Time-series forecasting</h3>
+          <p>ARIMA, Prophet, gradient boosting, TFT, and foundation forecasters such as TimesFM are built for demand, traffic, and sensor streams.</p>
+        </article>
+        <article class="card link-card">
+          <span class="tag">Control</span>
+          <h3>Planning, optimization, and RL</h3>
+          <p>Constraint solvers, heuristic search, bandits, RL, and operations research are often the right tool for actions, schedules, and control loops.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="kicker">Decision policy</span>
+        <h2>When to prefer non-LLM systems over LLMs</h2>
+      </div>
+      <div class="grid two">
+        <article class="card">
+          <h3>Prefer non-LLM or hybrid systems when…</h3>
+          <ul>
+            <li>The input is <strong>structured</strong>: tables, graphs, events, images, waveforms, logs, or sensor streams.</li>
+            <li>You need <strong>tight latency</strong>, high QPS, or edge inference.</li>
+            <li>You can define a clear loss, reward, ranking metric, or optimization objective.</li>
+            <li>You need <strong>calibration, reproducibility, or auditability</strong>.</li>
+            <li>You care more about precision, recall, NDCG, WER, RMSE, MAP, or cost per inference than open-ended language ability.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Use LLMs mostly as a wrapper when…</h3>
+          <ul>
+            <li>You need natural-language explanation, query rewriting, or report generation on top of another system.</li>
+            <li>You want an assistant to <strong>route</strong> user intent into search, retrieval, forecasting, recommendation, or optimization tools.</li>
+            <li>The underlying truth should come from deterministic systems, databases, or trained domain models.</li>
+            <li>Human interaction matters, but the core task is still ranking, prediction, perception, or planning.</li>
+          </ul>
+        </article>
+      </div>
+      <div class="callout accent-band">A strong production architecture is often <strong>LLM for interface, specialist model for execution, classical scoring for final decision, and retrieval or rules for grounding</strong>.</div>
+    </section>
+
+    <section class="section" id="approaches">
+      <div class="section-head">
+        <span class="kicker">Approaches</span>
+        <h2>Serious alternatives and complements to LLM-centric systems</h2>
+      </div>
+      <div class="stack-list">
+        <article class="wide-card stack-card">
+          <div class="stack-head">
+            <span class="tag">1 · Classical ML</span>
+            <h3>Gradient boosting, trees, linear models, anomaly detection</h3>
+          </div>
+          <p><strong>Best for:</strong> credit scoring, demand prediction, churn, propensity, tabular fraud features, industrial telemetry, risk models, and operations dashboards.</p>
+          <p><strong>Why it can outperform LLMs:</strong> tabular models like XGBoost, LightGBM, logistic regression, and random forests directly exploit structured features, need far less data and compute, and often deliver better calibrated decisions. They are also easier to explain and retrain on a business cadence.</p>
+          <div class="mini-grid">
+            <div class="mini-card"><strong>Efficiency edge</strong><p>CPU-first inference, tiny memory footprint, millisecond latency, easy batch scoring.</p></div>
+            <div class="mini-card"><strong>Hosting profile</strong><p>2–16 CPU cores and 8–64 GB RAM covers many workloads; GPU usually unnecessary.</p></div>
+            <div class="mini-card"><strong>Watch-outs</strong><p>Feature engineering still matters; poor features beat poor prompts only if the data pipeline is clean.</p></div>
+          </div>
+        </article>
+
+        <article class="wide-card stack-card">
+          <div class="stack-head">
+            <span class="tag">2 · Recommenders</span>
+            <h3>Collaborative filtering, factorization, DLRM, ranking pipelines</h3>
+          </div>
+          <p><strong>Best for:</strong> feeds, e-commerce, ads, content ranking, search result ordering, next-best action, and notification ranking.</p>
+          <p><strong>Why it can outperform LLMs:</strong> recommenders optimize ranking metrics directly, exploit behavior history, and can serve huge candidate sets at low latency. Systems inspired by DLRM and graph recommenders solve personalization problems that prose-generating models do not naturally optimize.</p>
+          <div class="mini-grid">
+            <div class="mini-card"><strong>Efficiency edge</strong><p>Two-stage retrieval + ranking pipelines are cheaper than asking an LLM to reason over every candidate item.</p></div>
+            <div class="mini-card"><strong>Hosting profile</strong><p>CPU clusters for retrieval, RAM-heavy embedding services, and optional GPU rankers for dense models.</p></div>
+            <div class="mini-card"><strong>Watch-outs</strong><p>Embedding tables are often memory-bandwidth bound; capacity planning matters more than headline FLOPS.</p></div>
+          </div>
+        </article>
+
+        <article class="wide-card stack-card">
+          <div class="stack-head">
+            <span class="tag">3 · Vision</span>
+            <h3>Detection, segmentation, OCR, inspection, tracking, multimodal perception</h3>
+          </div>
+          <p><strong>Best for:</strong> manufacturing QA, security cameras, medical imaging triage, robotics perception, retail analytics, document extraction, and autonomous inspection.</p>
+          <p><strong>Why it can outperform LLMs:</strong> optimized CNN and vision-transformer pipelines are purpose-built for pixel processing, throughput, and spatial outputs like boxes, masks, landmarks, and trajectories. They are easier to quantize and deploy on edge accelerators than general multimodal chat systems.</p>
+          <div class="mini-grid">
+            <div class="mini-card"><strong>Efficiency edge</strong><p>Edge GPUs, NPUs, and dedicated accelerators can run detectors in real time on camera streams.</p></div>
+            <div class="mini-card"><strong>Hosting profile</strong><p>Jetson-class edge devices for lightweight models; single GPUs for plant or warehouse servers; larger GPUs for batch analytics.</p></div>
+            <div class="mini-card"><strong>Watch-outs</strong><p>Dataset drift, lighting variation, and camera placement often matter more than model size.</p></div>
+          </div>
+        </article>
+
+        <article class="wide-card stack-card">
+          <div class="stack-head">
+            <span class="tag">4 · Speech</span>
+            <h3>ASR, keyword spotting, diarization, speaker verification, audio event detection</h3>
+          </div>
+          <p><strong>Best for:</strong> call centers, meeting transcription, voice interfaces, compliance review, wake words, subtitles, and acoustic monitoring.</p>
+          <p><strong>Why it can outperform LLMs:</strong> speech systems are trained on waveform or spectrogram structure, care about word error rate and latency, and often run in streaming mode. Whisper-class ASR models are strong examples of specialized sequence models that generalize well without needing the full cost profile of a giant chat model.</p>
+          <div class="mini-grid">
+            <div class="mini-card"><strong>Efficiency edge</strong><p>Streaming ASR and VAD can run continuously on CPUs or modest GPUs; wake-word systems can run on tiny edge hardware.</p></div>
+            <div class="mini-card"><strong>Hosting profile</strong><p>CPU for keyword spotting and diarization; 1 modest GPU for multi-stream transcription; more GPUs for batch media archives.</p></div>
+            <div class="mini-card"><strong>Watch-outs</strong><p>Accents, domain terminology, and noisy environments are the true deployment challenge.</p></div>
+          </div>
+        </article>
+
+        <article class="wide-card stack-card">
+          <div class="stack-head">
+            <span class="tag">5 · Forecasting</span>
+            <h3>ARIMA, Prophet, boosting, TFT, TimesFM, anomaly detection</h3>
+          </div>
+          <p><strong>Best for:</strong> sales, capacity planning, energy demand, server load, predictive maintenance, traffic, and financial operations.</p>
+          <p><strong>Why it can outperform LLMs:</strong> time-series models natively encode lag, seasonality, trend, covariates, and uncertainty. Recent forecasting foundation models show that a compact domain model can offer useful zero-shot performance on unseen series without the overhead of a general LLM.</p>
+          <div class="mini-grid">
+            <div class="mini-card"><strong>Efficiency edge</strong><p>Many forecasting stacks are CPU-friendly and train quickly; serving is cheap compared with text generation.</p></div>
+            <div class="mini-card"><strong>Hosting profile</strong><p>Small CPU nodes for classical forecasting, optional single GPU for deep temporal models or large-batch retraining.</p></div>
+            <div class="mini-card"><strong>Watch-outs</strong><p>Regime shifts and bad data pipelines destroy accuracy faster than model choice does.</p></div>
+          </div>
+        </article>
+
+        <article class="wide-card stack-card">
+          <div class="stack-head">
+            <span class="tag">6 · Graph ML</span>
+            <h3>Graph neural networks, link prediction, entity resolution, fraud graphs</h3>
+          </div>
+          <p><strong>Best for:</strong> fraud rings, supply chains, molecular property prediction, knowledge graphs, recommendations, and attack-path analysis.</p>
+          <p><strong>Why it can outperform LLMs:</strong> graphs encode relationships directly. Message passing and link prediction exploit topology that sequence models usually only approximate. In graph-native tasks, structural information is the signal.</p>
+          <div class="mini-grid">
+            <div class="mini-card"><strong>Efficiency edge</strong><p>Better use of relational context than flattening graphs into prompts.</p></div>
+            <div class="mini-card"><strong>Hosting profile</strong><p>RAM-heavy graph stores, CPU preprocessing, and optional GPUs for offline training or embedding refresh jobs.</p></div>
+            <div class="mini-card"><strong>Watch-outs</strong><p>Graph construction quality is everything; bad edges create bad intelligence.</p></div>
+          </div>
+        </article>
+
+        <article class="wide-card stack-card">
+          <div class="stack-head">
+            <span class="tag">7 · Retrieval & search</span>
+            <h3>BM25, learned sparse retrieval, vector search, hybrid retrieval, reranking</h3>
+          </div>
+          <p><strong>Best for:</strong> enterprise search, code search, support knowledge bases, document discovery, e-discovery, and corpus grounding.</p>
+          <p><strong>Why it can outperform LLMs:</strong> retrieval gives exact provenance, better freshness, lower cost, and controllable ranking behavior. In many products, users need <strong>find the right document</strong> more than <strong>generate a long answer</strong>.</p>
+          <div class="mini-grid">
+            <div class="mini-card"><strong>Efficiency edge</strong><p>Classic inverted indexes and hybrid retrieval can serve huge corpora with predictable latency.</p></div>
+            <div class="mini-card"><strong>Hosting profile</strong><p>CPU and NVMe matter most; GPU only for embedding generation or rerankers.</p></div>
+            <div class="mini-card"><strong>Watch-outs</strong><p>Chunking, metadata, and evaluation design matter more than swapping embedding models every week.</p></div>
+          </div>
+        </article>
+
+        <article class="wide-card stack-card">
+          <div class="stack-head">
+            <span class="tag">8 · Symbolic & probabilistic</span>
+            <h3>Rules engines, knowledge graphs, Bayesian models, causal and expert systems</h3>
+          </div>
+          <p><strong>Best for:</strong> compliance, policy enforcement, eligibility checks, diagnosis support, uncertain reasoning, and domains with hard constraints.</p>
+          <p><strong>Why it can outperform LLMs:</strong> explicit logic, priors, and uncertainty tracking allow verifiable decisions. If the business needs proofs, explanations, or guaranteed constraint satisfaction, symbolic and probabilistic systems remain indispensable.</p>
+          <div class="mini-grid">
+            <div class="mini-card"><strong>Efficiency edge</strong><p>Small footprint, transparent reasoning paths, deterministic outputs where required.</p></div>
+            <div class="mini-card"><strong>Hosting profile</strong><p>Mostly CPU and database infrastructure; often simple to self-host and monitor.</p></div>
+            <div class="mini-card"><strong>Watch-outs</strong><p>Knowledge capture is expensive; brittle rules fail if the domain changes constantly.</p></div>
+          </div>
+        </article>
+
+        <article class="wide-card stack-card">
+          <div class="stack-head">
+            <span class="tag">9 · Planning, optimization, RL</span>
+            <h3>Search, solvers, bandits, MPC, reinforcement learning, simulation</h3>
+          </div>
+          <p><strong>Best for:</strong> routing, dispatch, scheduling, inventory, bidding, robotics, game control, adaptive pricing, and control systems.</p>
+          <p><strong>Why it can outperform LLMs:</strong> these systems optimize actions under constraints rather than generate plausible language. For action selection, shortest path, or policy learning, an optimizer or controller is often the correct substrate.</p>
+          <div class="mini-grid">
+            <div class="mini-card"><strong>Efficiency edge</strong><p>Many solvers are CPU-efficient; simulation-heavy RL uses GPUs selectively instead of constantly for serving.</p></div>
+            <div class="mini-card"><strong>Hosting profile</strong><p>CPU fleets for optimization, optional GPU workers for policy learning, simulators, and offline training.</p></div>
+            <div class="mini-card"><strong>Watch-outs</strong><p>Objective design matters. Optimize the wrong metric and the system will do exactly that.</p></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="hardware">
+      <div class="section-head">
+        <span class="kicker">Hosting guidance</span>
+        <h2>Hardware profiles that make sense for non-LLM systems</h2>
+        <p class="section-intro">Compared with frontier LLM serving, many non-LLM systems are dramatically more forgiving. The practical bottleneck is often not pure compute but <strong>memory bandwidth, storage locality, stream handling, and data plumbing</strong>.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>System type</th>
+              <th>Good hardware profile</th>
+              <th>Why this profile works</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Classical ML on tables</td>
+              <td>CPU server, 8–32 cores, 32–128 GB RAM, NVMe</td>
+              <td>Training and inference are usually memory-light and parallelizable without GPUs.</td>
+            </tr>
+            <tr>
+              <td>Retrieval and search</td>
+              <td>High-RAM CPU nodes, fast NVMe, optional small GPU for embeddings</td>
+              <td>Indexes and vector stores are mostly I/O and RAM problems, not giant-model problems.</td>
+            </tr>
+            <tr>
+              <td>Recommendation retrieval/ranking</td>
+              <td>CPU retrieval tier + RAM-heavy feature stores + optional GPU ranker</td>
+              <td>Candidate generation and embedding lookup dominate; GPU helps mainly on dense reranking.</td>
+            </tr>
+            <tr>
+              <td>Vision on edge</td>
+              <td>Jetson, Coral, NPU-equipped industrial PC, or modest edge GPU</td>
+              <td>Real-time camera workloads care about wattage, thermals, and stable stream throughput.</td>
+            </tr>
+            <tr>
+              <td>Speech and media transcription</td>
+              <td>CPU for small streams, single GPU for many streams or faster batch jobs</td>
+              <td>Streaming pipelines scale well before you need expensive multi-GPU systems.</td>
+            </tr>
+            <tr>
+              <td>Forecasting</td>
+              <td>CPU-first analytics boxes; optional single GPU for deep temporal models</td>
+              <td>Cheap retraining and large batch scoring beat heavyweight always-on generation servers.</td>
+            </tr>
+            <tr>
+              <td>Graph ML and fraud</td>
+              <td>High-memory CPU + graph database + optional GPU training worker</td>
+              <td>Graph construction, storage, and offline embedding refresh often dominate cost.</td>
+            </tr>
+            <tr>
+              <td>Optimization and planning</td>
+              <td>CPU server with many cores, strong cache, low-latency storage</td>
+              <td>Solvers, search, and scheduling often reward CPU efficiency over giant accelerators.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="grid three hardware-grid">
+        <article class="card">
+          <span class="label">Starter</span>
+          <h3>Quiet lab box</h3>
+          <p>Mini PC or desktop with modern CPU, 32–64 GB RAM, 1–2 TB NVMe. Great for classical ML, retrieval, light forecasting, feature stores, and experimentation.</p>
+        </article>
+        <article class="card">
+          <span class="label">Balanced</span>
+          <h3>One-GPU specialist node</h3>
+          <p>Useful for vision, speech, batch embeddings, smaller graph training, and deep recommenders. Often the best price/performance point for a serious small team.</p>
+        </article>
+        <article class="card">
+          <span class="label">Scale</span>
+          <h3>RAM-and-storage heavy cluster</h3>
+          <p>For search, recommendation, and graph-heavy systems, cluster design often matters more than chasing the largest possible GPU.</p>
+        </article>
+      </div>
+      <div class="callout warn">For many non-LLM workloads, the smartest hardware upgrade is <strong>more RAM, better NVMe, cleaner data ingestion, and better observability</strong>—not automatically a larger accelerator.</div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="kicker">Architecture</span>
+        <h2>Common hybrid patterns that work better than pure prompting</h2>
+      </div>
+      <div class="grid two">
+        <article class="card">
+          <h3>LLM + retrieval + ranker</h3>
+          <p>Use retrieval to find candidates, a ranker to sort them, and an LLM only to summarize or explain. This is usually more faithful and cheaper than direct generation from memory.</p>
+        </article>
+        <article class="card">
+          <h3>LLM + rules + optimizer</h3>
+          <p>Let the LLM translate human intent, but enforce policy with rules and compute the final plan using a solver or planner.</p>
+        </article>
+        <article class="card">
+          <h3>LLM + vision/speech specialists</h3>
+          <p>Use specialist models for detection, OCR, ASR, or diarization, then pass structured outputs to an LLM for interaction or report writing.</p>
+        </article>
+        <article class="card">
+          <h3>LLM + classical scorer</h3>
+          <p>Use classical ML for the final prediction or thresholded decision when the business needs calibrated confidence and measurable ROC or PR curves.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="kicker">Research context</span>
+        <h2>Papers and systems that shaped this view</h2>
+      </div>
+      <div class="grid two refs-grid">
+        <article class="card">
+          <h3>Representative foundations</h3>
+          <ul>
+            <li><strong>XGBoost</strong> (Chen &amp; Guestrin, 2016): a durable baseline for structured prediction.</li>
+            <li><strong>PinSage</strong> (Ying et al., 2018): graph convolution at Pinterest scale for recommendations.</li>
+            <li><strong>DLRM</strong> (Naumov et al., 2019): deep learning recommendation architecture centered on embeddings and feature interaction.</li>
+            <li><strong>ResNet</strong> (He et al., 2015) and <strong>YOLO</strong> families: practical vision throughput and deployment.</li>
+            <li><strong>Whisper</strong> (Radford et al., 2022): robust speech recognition via large-scale weak supervision.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Why these matter here</h3>
+          <ul>
+            <li><strong>TimesFM</strong> (Google Research, 2024): a 200M-parameter time-series foundation model showing strong zero-shot forecasting on unseen datasets.</li>
+            <li><strong>AlphaGo / AlphaZero / MuZero</strong>: landmark proof that planning, search, and RL remain central for sequential decision problems.</li>
+            <li><strong>Bayesian and probabilistic modeling</strong>: still critical where uncertainty estimates matter.</li>
+            <li><strong>Hybrid retrieval systems</strong>: evidence that exact search, sparse retrieval, and reranking remain core production patterns.</li>
+          </ul>
+        </article>
+      </div>
+      <div class="footer-note">Research notes used in framing include Google Research's TimesFM overview, the Whisper paper abstract, PinSage at Pinterest scale, and deployment guidance around recommendation-system memory bandwidth and embedding-table bottlenecks.</div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="kicker">Bottom line</span>
+        <h2>The future is not LLM-only</h2>
+      </div>
+      <p class="quote">The likely winning stack for many companies is not one giant general model. It is a <strong>portfolio</strong>: retrieval for facts, classical ML for scoring, graph models for relationships, specialist perception models for audio and vision, optimization for action, and LLMs for interaction and orchestration.</p>
+      <div class="hero-actions">
+        <a class="button primary" href="../ai-research-site/ai-hardware-research-package/index.html">Compare hardware guidance</a>
+        <a class="button" href="../ai-research-site/llm-learning-library/">Cross-link to the LLM library</a>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
